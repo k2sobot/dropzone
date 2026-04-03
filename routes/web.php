@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\UploadController as AdminUploadController;
@@ -25,7 +26,14 @@ Route::get('/d/{uuid}/download', [DownloadController::class, 'download'])->name(
 |--------------------------------------------------------------------------
 */
 
-Route::prefix('admin')->name('admin.')->group(function () {
+// Admin login (public)
+Route::get('/admin/login', [AuthController::class, 'login'])->name('admin.login');
+Route::post('/admin/login', [AuthController::class, 'authenticate'])->name('admin.authenticate');
+
+Route::prefix('admin')->name('admin.')->middleware(['web', \App\Http\Middleware\AdminAuth::class])->group(function () {
+    // Logout
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
     // Dashboard
     Route::get('/', DashboardController::class)->name('dashboard');
 

@@ -13,12 +13,10 @@ class AdminAuth
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // In production, implement proper authentication
-        // For MVP, this is a placeholder
-        
-        // Example: Check for a secret token in session or config
-        // Or use Laravel's built-in auth with a single admin user
-        
+        if (! session('admin_authenticated')) {
+            return redirect()->route('admin.login');
+        }
+
         return $next($request);
     }
 }

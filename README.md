@@ -48,6 +48,18 @@ php artisan migrate
 php artisan storage:link
 ```
 
+## Security
+
+**Important:** Change the default admin password!
+
+1. Set `ADMIN_PASSWORD` in your `.env` file
+2. Use a strong, unique password
+
+The admin panel is protected by this password. For production, consider:
+- Adding rate limiting to the login form
+- Using Laravel's built-in authentication
+- Adding two-factor authentication
+
 ## License
 
 MIT

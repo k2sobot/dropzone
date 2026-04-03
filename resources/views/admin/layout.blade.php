@@ -14,6 +14,12 @@
                     <a href="{{ route('admin.dashboard') }}" class="text-white font-bold text-xl">
                         {{ $siteName ?? 'Dropzone' }} Admin
                     </a>
+                    <form action="{{ route('admin.logout') }}" method="POST" class="ml-4">
+                        @csrf
+                        <button type="submit" class="text-red-400 hover:text-red-300 text-sm">
+                            Logout
+                        </button>
+                    </form>
                 </div>
                 <div class="flex space-x-4">
                     <a href="{{ route('admin.dashboard') }}" 
