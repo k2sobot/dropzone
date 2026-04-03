@@ -5,24 +5,17 @@ services:
       dockerfile: Dockerfile
     container_name: dropzone-app
     restart: unless-stopped
-    working_dir: /var/www
-    volumes:
-      - .:/var/www
-      - ./storage:/var/www/storage
     ports:
       - "8080:80"
     environment:
-      - APP_ENV=local
-      - APP_DEBUG=true
-      - APP_URL=http://localhost:8080
-      - DB_CONNECTION=sqlite
-    depends_on:
-      - redis
-
-  redis:
-    image: redis:alpine
-    container_name: dropzone-redis
-    restart: unless-stopped
-
-volumes:
-  storage:
+      - APP_ENV=${APP_ENV:-production}
+      - APP_DEBUG=${APP_DEBUG:-false}
+      - APP_URL=${APP_URL:-http://localhost:8080}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin123}
+    volumes:
+      - ./storage:/var/www/storage
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 3

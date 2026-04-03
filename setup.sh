@@ -2,16 +2,17 @@
 
 set -e
 
-echo "🚀 Setting up Dropzone..."
+echo "🚀 Dropzone Setup"
+echo "=================="
 
-# Copy environment file
+# Check if .env exists
 if [ ! -f .env ]; then
+    echo "📝 Creating .env file..."
     cp .env.production .env
-    echo "✓ Created .env file"
 fi
 
 # Install dependencies
-echo "📦 Installing Composer dependencies..."
+echo "📦 Installing dependencies..."
 composer install --no-dev --optimize-autoloader
 
 # Generate app key
@@ -36,7 +37,9 @@ echo "🔐 Setting permissions..."
 chmod -R 775 storage bootstrap/cache
 
 echo ""
-echo "✅ Dropzone is ready!"
-echo "🌐 Visit: http://localhost:8080"
+echo "✅ Setup complete!"
 echo ""
-echo "Admin panel: http://localhost:8080/admin"
+echo "🌐 Upload page: http://localhost:8080"
+echo "🔐 Admin panel: http://localhost:8080/admin"
+echo "⚙️  Admin password: check ADMIN_PASSWORD in .env"
+echo ""
