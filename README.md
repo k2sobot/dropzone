@@ -21,11 +21,31 @@ Self-hosted file sharing with one-time download links.
 
 ## Installation
 
+### Docker (Recommended)
+
+```bash
+# Build and start
+docker-compose up -d --build
+
+# Run setup inside container
+docker exec -it dropzone-app bash setup.sh
+
+# Or manually:
+docker exec -it dropzone-app composer install
+docker exec -it dropzone-app php artisan key:generate
+docker exec -it dropzone-app php artisan migrate
+```
+
+Visit: http://localhost:8080
+
+### Manual
+
 ```bash
 composer install
 cp .env.example .env
 php artisan key:generate
 php artisan migrate
+php artisan storage:link
 ```
 
 ## License

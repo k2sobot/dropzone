@@ -21,3 +21,7 @@ yarn-error.log
 *.sqlite3
 
 !.gitkeep
+
+# Docker
+.docker
+docker-compose.override.yml
