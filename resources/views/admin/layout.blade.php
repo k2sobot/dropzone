@@ -54,6 +54,8 @@
         @endif
 
         @yield('content')
+
+@yield('scripts')
     </main>
 </body>
 </html>

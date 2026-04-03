@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\AdminSetting;
 use App\Models\Upload;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Str;
@@ -30,6 +31,9 @@ class FileService
             file_get_contents( $file->getRealPath() )
         );
 
+        // Get expiration setting (default 24 hours)
+        $expirationHours = (int) AdminSetting::get( 'default_expiration', 24 );
+
         // Create database record
         return Upload::create( [
             'id'           => $uuid,
@@ -38,7 +42,7 @@ class FileService
             'size'         => $file->getSize(),
             'mime_type'    => $file->getMimeType(),
             'uploader_ip'  => $uploaderIp,
-            'expires_at'   => now()->addDays( 7 ),
+            'expires_at'   => now()->addHours( $expirationHours ),
         ] );
     }
 
