@@ -30,6 +30,10 @@
                        class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
                         Uploads
                     </a>
+                    <a href="{{ route('admin.extensions.index') }}"
+                       class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+                        Extensions
+                    </a>
                     <a href="{{ route('admin.settings.index') }}"
                        class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
                         Settings

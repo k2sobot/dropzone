@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\SettingController;
+use App\Http\Controllers\Admin\ExtensionController;
 use App\Http\Controllers\Admin\UploadController as AdminUploadController;
 use App\Http\Controllers\DownloadController;
 use App\Http\Controllers\UploadController;
@@ -40,6 +41,9 @@ Route::prefix('admin')->name('admin.')->middleware(['web', \App\Http\Middleware\
     // Uploads management
     Route::get('/uploads', [AdminUploadController::class, 'index'])->name('uploads.index');
     Route::delete('/uploads/{id}', [AdminUploadController::class, 'destroy'])->name('uploads.destroy');
+
+    // Extension management
+    Route::get('/extensions', [ExtensionController::class, 'index'])->name('extensions.index');
 
     // Settings
     Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');

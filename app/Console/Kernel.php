@@ -11,6 +11,10 @@ class Kernel extends ConsoleKernel
      */
     protected $commands = [
         \App\Console\Commands\CleanupExpiredUploads::class,
+        \App\Console\Commands\ExtensionInstallCommand::class,
+        \App\Console\Commands\ExtensionUninstallCommand::class,
+        \App\Console\Commands\ExtensionUpdateCommand::class,
+        \App\Console\Commands\ExtensionListCommand::class,
     ];
 
     /**
