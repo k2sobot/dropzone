@@ -1,0 +1,24 @@
+{
+    "name": "dropzone/s3",
+    "type": "dropzone-extension",
+    "description": "Amazon S3 and DigitalOcean Spaces storage for Dropzone",
+    "license": "MIT",
+    "require": {
+        "php": "^8.2",
+        "aws/aws-sdk-php": "^3.260"
+    },
+    "autoload": {
+        "psr-4": {
+            "Dropzone\\S3\\": "src/"
+        }
+    },
+    "extra": {
+        "dropzone": {
+            "name": "S3 / DO Spaces Storage",
+            "description": "Store files on Amazon S3 or DigitalOcean Spaces",
+            "icon": "cloud",
+            "storage_driver": "s3",
+            "config_key": "dropzone-s3"
+        }
+    }
+}

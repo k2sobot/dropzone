@@ -2,55 +2,74 @@
 
 namespace App\Services;
 
-use App\Models\AdminSetting;
 use App\Models\Upload;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class FileService
 {
+    protected StorageDriverInterface $storage;
+
+    public function __construct( StorageDriverInterface $storage )
+    {
+        $this->storage = $storage;
+    }
+
     /**
      * Store an uploaded file.
      */
-    public function store(UploadedFile $file, ?string $uploaderIp = null): Upload
+    public function store( UploadedFile $file, ?string $uploaderIp = null ): Upload
     {
         $uuid = (string) Str::uuid();
-        $extension = $file->getClientOriginalExtension();
         $filename = $file->getClientOriginalName();
         $path = "uploads/{$uuid}/{$filename}";
 
-        // Store the file
-        Storage::disk('local')->putFileAs(
-            "uploads/{$uuid}",
-            $file,
-            $filename
+        // Store via storage driver
+        $storedPath = $this->storage->store(
+            $path,
+            file_get_contents( $file->getRealPath() )
         );
 
         // Create database record
-        return Upload::create([
-            'id' => $uuid,
-            'filename' => $filename,
-            'path' => $path,
-            'size' => $file->getSize(),
-            'mime_type' => $file->getMimeType(),
-            'uploader_ip' => $uploaderIp,
-            'expires_at' => now()->addDays(7),
-        ]);
+        return Upload::create( [
+            'id'           => $uuid,
+            'filename'     => $filename,
+            'path'         => $storedPath,
+            'size'         => $file->getSize(),
+            'mime_type'    => $file->getMimeType(),
+            'uploader_ip'  => $uploaderIp,
+            'expires_at'   => now()->addDays( 7 ),
+        ] );
     }
 
     /**
      * Download a file and mark as downloaded.
      */
-    public function download(string $uuid): ?array
+    public function download( string $uuid ): ?array
     {
-        $upload = Upload::find($uuid);
+        $upload = Upload::find( $uuid );
 
-        if (! $upload || ! $upload->isAvailable()) {
+        if ( ! $upload || ! $upload->isAvailable() ) {
             return null;
         }
 
-        if (! Storage::disk('local')->exists($upload->path)) {
+        // Check for temporary URL (cloud storage)
+        $tempUrl = $this->storage->temporaryUrl( $upload->path );
+
+        if ( $tempUrl ) {
+            // Redirect to cloud storage URL
+            $upload->markAsDownloaded();
+
+            return [
+                'upload' => $upload,
+                'url'    => $tempUrl,
+            ];
+        }
+
+        // Get contents for local storage
+        $contents = $this->storage->get( $upload->path );
+
+        if ( ! $contents ) {
             return null;
         }
 
@@ -58,22 +77,19 @@ class FileService
         $upload->markAsDownloaded();
 
         return [
-            'upload' => $upload,
-            'content' => Storage::disk('local')->get($upload->path),
+            'upload'   => $upload,
+            'content'  => $contents,
         ];
     }
 
     /**
      * Delete a file and its record.
      */
-    public function delete(Upload $upload): bool
+    public function delete( Upload $upload ): bool
     {
         // Delete from storage
-        if (Storage::disk('local')->exists($upload->path)) {
-            Storage::disk('local')->delete($upload->path);
-            // Try to remove the parent directory
-            $dir = dirname($upload->path);
-            Storage::disk('local')->deleteDirectory($dir);
+        if ( $this->storage->exists( $upload->path ) ) {
+            $this->storage->delete( $upload->path );
         }
 
         // Delete from database
@@ -87,18 +103,18 @@ class FileService
     {
         $deleted = 0;
 
-        $expired = Upload::where('expires_at', '<', now())
-            ->whereNull('downloaded_at')
+        $expired = Upload::where( 'expires_at', '<', now() )
+            ->whereNull( 'downloaded_at' )
             ->get();
 
-        foreach ($expired as $upload) {
-            $this->delete($upload);
+        foreach ( $expired as $upload ) {
+            $this->delete( $upload );
             $deleted++;
         }
 
-        // Also permanently delete soft-deleted records older than 24 hours
+        // Force delete soft-deleted records older than 24 hours
         Upload::onlyTrashed()
-            ->where('deleted_at', '<', now()->subDay())
+            ->where( 'deleted_at', '<', now()->subDay() )
             ->forceDelete();
 
         return $deleted;
@@ -110,15 +126,23 @@ class FileService
     public function getStats(): array
     {
         return [
-            'total_files' => Upload::count(),
-            'total_size' => Upload::sum('size'),
-            'active_files' => Upload::whereNull('downloaded_at')
-                ->where('expires_at', '>', now())
+            'total_files'      => Upload::count(),
+            'total_size'       => Upload::sum( 'size' ),
+            'active_files'     => Upload::whereNull( 'downloaded_at' )
+                ->where( 'expires_at', '>', now() )
                 ->count(),
-            'downloaded_files' => Upload::whereNotNull('downloaded_at')->count(),
-            'expired_files' => Upload::where('expires_at', '<', now())
-                ->whereNull('downloaded_at')
+            'downloaded_files' => Upload::whereNotNull( 'downloaded_at' )->count(),
+            'expired_files'    => Upload::where( 'expires_at', '<', now() )
+                ->whereNull( 'downloaded_at' )
                 ->count(),
         ];
+    }
+
+    /**
+     * Get the current storage driver.
+     */
+    public function getStorageDriver(): StorageDriverInterface
+    {
+        return $this->storage;
     }
 }
