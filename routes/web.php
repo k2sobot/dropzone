@@ -62,6 +62,8 @@ Route::prefix('admin')->name('admin.')->middleware(['web', 'admin'])->group(func
     Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
     Route::post('/settings', [SettingController::class, 'update'])->name('settings.update');
     Route::post('/settings/background', [SettingController::class, 'uploadBackground'])->name('settings.background');
+    Route::get('/settings/security', [SettingController::class, 'security'])->name('settings.security');
+    Route::post('/settings/security', [SettingController::class, 'updateSecurity'])->name('settings.security.update');
 
     // System
     Route::get('/system', [SystemController::class, 'status'])->name('system.status');

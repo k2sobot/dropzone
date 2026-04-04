@@ -16,9 +16,17 @@
         @csrf
 
         <div>
+            <label class="block text-gray-300 text-sm mb-2">Username</label>
+            <input type="text" name="username" value="{{ old('username') }}" required autofocus
+                class="w-full bg-gray-700 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Enter your username">
+        </div>
+
+        <div>
             <label class="block text-gray-300 text-sm mb-2">Password</label>
-            <input type="password" name="password" required autofocus
-                class="w-full bg-gray-700 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <input type="password" name="password" required
+                class="w-full bg-gray-700 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Enter your password">
         </div>
 
         <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition">
@@ -27,7 +35,7 @@
     </form>
 
     <p class="text-center text-gray-500 text-xs mt-6">
-        Set ADMIN_PASSWORD in your .env file
+        Default: admin / admin123 (set ADMIN_USERNAME and ADMIN_PASSWORD in .env)
     </p>
 </div>
 @endsection

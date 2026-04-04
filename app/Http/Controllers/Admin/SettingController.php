@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\AdminSetting;
+use App\Models\SystemLog;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
@@ -194,5 +196,82 @@ class SettingController
         }
 
         file_put_contents($envPath, $content);
+    }
+
+    /**
+     * Show security settings page.
+     */
+    public function security(): View
+    {
+        return view('admin.settings.security', [
+            'siteName' => AdminSetting::getSiteName(),
+            'currentUsername' => AdminSetting::get('admin_username', env('ADMIN_USERNAME', 'admin')),
+        ]);
+    }
+
+    /**
+     * Update security settings (username and password).
+     */
+    public function updateSecurity(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'username' => 'required|string|min:3|max:50|alpha_dash',
+            'password' => 'nullable|string|min:8|confirmed',
+            'current_password' => 'required|string',
+        ]);
+
+        // Verify current password
+        $storedUsername = AdminSetting::get('admin_username');
+        $storedPasswordHash = AdminSetting::get('admin_password');
+        $envPassword = config('app.admin_password', env('ADMIN_PASSWORD', 'admin123'));
+        $envUsername = config('app.admin_username', env('ADMIN_USERNAME', 'admin'));
+
+        $validPassword = false;
+
+        if ($storedUsername && $storedPasswordHash) {
+            // Database credentials exist
+            if (session('admin_username') !== $storedUsername) {
+                return back()->with('error', 'Session mismatch. Please log in again.');
+            }
+            $validPassword = Hash::check($request->get('current_password'), $storedPasswordHash);
+        } else {
+            // Using env credentials
+            $validPassword = $request->get('current_password') === $envPassword;
+        }
+
+        if (!$validPassword) {
+            SystemLog::warning('Failed security settings update - invalid current password', [
+                'ip' => $request->ip(),
+                'username' => session('admin_username'),
+            ]);
+            return back()->with('error', 'Current password is incorrect.');
+        }
+
+        $changes = [];
+
+        // Update username if changed
+        $newUsername = $request->get('username');
+        if ($newUsername !== AdminSetting::get('admin_username', $envUsername)) {
+            AdminSetting::set('admin_username', $newUsername);
+            session(['admin_username' => $newUsername]);
+            $changes[] = 'username';
+        }
+
+        // Update password if provided
+        if ($request->filled('password')) {
+            AdminSetting::set('admin_password', Hash::make($request->get('password')));
+            $changes[] = 'password';
+        }
+
+        if (!empty($changes)) {
+            SystemLog::info('Admin security settings updated', [
+                'changes' => $changes,
+                'username' => $newUsername,
+                'ip' => $request->ip(),
+            ]);
+            return back()->with('success', 'Security settings updated successfully.');
+        }
+
+        return back()->with('info', 'No changes were made.');
     }
 }

@@ -38,6 +38,10 @@
                        class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
                         Settings
                     </a>
+                    <a href="{{ route('admin.settings.security') }}"
+                       class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+                        Security
+                    </a>
                     <a href="{{ route('admin.system.status') }}"
                        class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
                         System
