@@ -75,7 +75,7 @@ class ExtensionInstallCommand extends Command
             $command[] = "{$package}:{$version}";
         }
 
-        $result = $this->runCommand( $command );
+        $result = $this->execCommand( $command );
 
         if ( $result === 0 ) {
             $this->info( "✓ {$package} installed successfully" );
@@ -111,7 +111,7 @@ class ExtensionInstallCommand extends Command
 
         // Clone the repository
         $branch = $this->option( 'branch' ) ?? 'main';
-        $result = $this->runCommand( [
+        $result = $this->execCommand( [
             'git', 'clone',
             '--branch', $branch,
             '--depth', '1',
@@ -165,7 +165,7 @@ class ExtensionInstallCommand extends Command
         }
 
         $branch = $this->option( 'branch' ) ?? 'main';
-        $result = $this->runCommand( [
+        $result = $this->execCommand( [
             'git', 'clone',
             '--branch', $branch,
             '--depth', '1',
@@ -202,7 +202,7 @@ class ExtensionInstallCommand extends Command
         // Run composer install if extension has dependencies
         if ( file_exists( "{$path}/composer.json" ) ) {
             $this->line( 'Installing extension dependencies...' );
-            $this->runCommand( [ 'composer', 'install', '--no-dev' ], $path );
+            $this->execCommand( [ 'composer', 'install', '--no-dev' ], $path );
         }
     }
 
@@ -251,9 +251,9 @@ class ExtensionInstallCommand extends Command
     }
 
     /**
-     * Run a shell command.
+     * Execute a shell command.
      */
-    protected function runCommand( array $command, ?string $cwd = null ): int
+    protected function execCommand( array $command, ?string $cwd = null ): int
     {
         $process = new \Symfony\Component\Process\Process( $command, $cwd ?? base_path() );
         $process->setTimeout( 300 );

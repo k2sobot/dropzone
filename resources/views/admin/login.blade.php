@@ -1,4 +1,4 @@
-@extends('upload', ['siteName' => $siteName])
+@extends('layout', ['siteName' => $siteName])
 
 @section('content')
 <div class="bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl p-8 max-w-md w-full">

@@ -18,7 +18,7 @@ class UploadController extends Controller
      */
     public function index()
     {
-        return view('upload', [
+        return view('upload-content', [
             'siteName' => AdminSetting::getSiteName(),
             'maxFileSize' => AdminSetting::getMaxFileSize(),
         ]);

@@ -38,10 +38,15 @@ WORKDIR /var/www
 # Copy application
 COPY . /var/www
 
-# Set permissions
-RUN chown -R www-data:www-data /var/www \
-    && chmod -R 755 /var/www/storage \
-    && chmod -R 755 /var/www/bootstrap/cache
+# Create directories and set permissions
+RUN mkdir -p /var/www/bootstrap/cache \
+    && mkdir -p /var/www/storage/framework/views \
+    && mkdir -p /var/www/storage/framework/cache \
+    && mkdir -p /var/www/storage/framework/sessions \
+    && mkdir -p /var/www/storage/logs \
+    && chown -R www-data:www-data /var/www \
+    && chmod -R 775 /var/www/storage \
+    && chmod -R 775 /var/www/bootstrap/cache
 
 # Configure Apache DocumentRoot
 RUN sed -i 's|/var/www/html|/var/www/public|g' /etc/apache2/sites-available/000-default.conf \
@@ -51,14 +56,21 @@ RUN sed -i 's|/var/www/html|/var/www/public|g' /etc/apache2/sites-available/000-
 </Directory>' >> /etc/apache2/apache2.conf
 
 # Create startup script
-RUN echo '#!/bin/bash\n\
+RUN printf '#!/bin/bash\n\
 set -e\n\
 \n\
-# Initialize database if needed\n\
-if [ ! -f /var/www/storage/database.sqlite ]; then\n\
-    touch /var/www/storage/database.sqlite\n\
-    chmod 666 /var/www/storage/database.sqlite\n\
-fi\n\
+# Remove existing database for clean slate\n\
+rm -f /var/www/storage/database.sqlite\n\
+\n\
+# Create fresh database\n\
+touch /var/www/storage/database.sqlite\n\
+chmod 666 /var/www/storage/database.sqlite\n\
+\n\
+# Create required directories\n\
+mkdir -p /var/www/storage/framework/views\n\
+mkdir -p /var/www/storage/framework/cache\n\
+mkdir -p /var/www/storage/framework/sessions\n\
+mkdir -p /var/www/storage/logs\n\
 \n\
 # Install dependencies if vendor missing\n\
 if [ ! -d /var/www/vendor ]; then\n\
@@ -70,11 +82,17 @@ if [ -z "$APP_KEY" ]; then\n\
     php artisan key:generate --force\n\
 fi\n\
 \n\
-# Run migrations\n\
-php artisan migrate --force\n\
+# Run fresh migrations\n\
+php artisan migrate:fresh --force\n\
 \n\
 # Create storage link\n\
 php artisan storage:link\n\
+\n\
+# Set proper permissions after everything is ready\n\
+chown -R www-data:www-data /var/www/storage\n\
+chown -R www-data:www-data /var/www/bootstrap/cache\n\
+chmod -R 775 /var/www/storage\n\
+chmod -R 775 /var/www/bootstrap/cache\n\
 \n\
 # Start Supervisor\n\
 exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf\n\

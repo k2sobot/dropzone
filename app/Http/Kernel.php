@@ -34,5 +34,7 @@ class Kernel extends HttpKernel
     protected $middlewareAliases = [
         'bindings' => \Illuminate\Routing\Middleware\SubstituteBindings::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
+        'admin' => \App\Http\Middleware\AdminMiddleware::class,
+        'setup.not-complete' => \App\Http\Middleware\SetupNotComplete::class,
     ];
 }

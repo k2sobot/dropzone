@@ -15,7 +15,9 @@ class AuthController
      */
     public function login(): View
     {
-        return view('admin.login');
+        return view('admin.login', [
+            'siteName' => AdminSetting::getSiteName(),
+        ]);
     }
 
     /**
