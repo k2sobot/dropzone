@@ -38,6 +38,10 @@
                        class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
                         Settings
                     </a>
+                    <a href="{{ route('admin.system.status') }}"
+                       class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+                        System
+                    </a>
                     <a href="{{ route('home') }}" class="text-blue-400 hover:text-blue-300 px-3 py-2 rounded-md text-sm font-medium">
                         View Site →
                     </a>

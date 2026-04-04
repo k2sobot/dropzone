@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\ExtensionController;
 use App\Http\Controllers\Admin\UploadController as AdminUploadController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\SystemController;
 use App\Http\Controllers\DownloadController;
 use App\Http\Controllers\UploadController;
 use Illuminate\Support\Facades\Route;
@@ -61,4 +62,11 @@ Route::prefix('admin')->name('admin.')->middleware(['web', 'admin'])->group(func
     Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
     Route::post('/settings', [SettingController::class, 'update'])->name('settings.update');
     Route::post('/settings/background', [SettingController::class, 'uploadBackground'])->name('settings.background');
+
+    // System
+    Route::get('/system', [SystemController::class, 'status'])->name('system.status');
+    Route::get('/system/logs', [SystemController::class, 'logs'])->name('system.logs');
+    Route::post('/system/logs/clear', [SystemController::class, 'logsClear'])->name('system.logs.clear');
+    Route::get('/system/tools', [SystemController::class, 'tools'])->name('system.tools');
+    Route::post('/system/tools/execute', [SystemController::class, 'toolsExecute'])->name('system.tools.execute');
 });
