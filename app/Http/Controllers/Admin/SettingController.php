@@ -3,7 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\AdminSetting;
+use App\Models\OAuthProvider;
 use App\Models\SystemLog;
+use App\Models\TwoFactorAuth;
+use App\Services\OAuthService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
@@ -203,9 +206,23 @@ class SettingController
      */
     public function security(): View
     {
+        $oauthService = app(OAuthService::class);
+        $enabledProviders = $oauthService->getEnabledProviders();
+        $username = session('admin_username');
+        $twoFactor = TwoFactorAuth::getForUsername($username);
+
         return view('admin.settings.security', [
             'siteName' => AdminSetting::getSiteName(),
             'currentUsername' => AdminSetting::get('admin_username', env('ADMIN_USERNAME', 'admin')),
+            'twoFactorEnabled' => $twoFactor?->isEnabled() ?? false,
+            'recoveryCodesCount' => $twoFactor ? count($twoFactor->recovery_codes) : 0,
+            'enabledProviders' => $enabledProviders,
+            'googleConnected' => OAuthProvider::where('provider', 'google')
+                ->where('email', $username)
+                ->exists(),
+            'githubConnected' => OAuthProvider::where('provider', 'github')
+                ->where('email', $username)
+                ->exists(),
         ]);
     }
 

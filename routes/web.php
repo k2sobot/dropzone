@@ -8,6 +8,8 @@ use App\Http\Controllers\Admin\ExtensionController;
 use App\Http\Controllers\Admin\UploadController as AdminUploadController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\SystemController;
+use App\Http\Controllers\Admin\OAuthController;
+use App\Http\Controllers\Admin\TwoFactorController;
 use App\Http\Controllers\DownloadController;
 use App\Http\Controllers\UploadController;
 use Illuminate\Support\Facades\Route;
@@ -41,6 +43,15 @@ Route::get('/d/{uuid}/download', [DownloadController::class, 'download'])->name(
 Route::get('/admin/login', [AuthController::class, 'login'])->name('admin.login');
 Route::post('/admin/login', [AuthController::class, 'authenticate'])->name('admin.authenticate');
 
+// OAuth routes (public)
+Route::get('/admin/oauth/{provider}', [OAuthController::class, 'redirect'])->name('admin.oauth.redirect');
+Route::get('/admin/oauth/{provider}/callback', [OAuthController::class, 'callback'])->name('admin.oauth.callback');
+
+// 2FA routes (public, requires pending session)
+Route::get('/admin/2fa', [TwoFactorController::class, 'verify'])->name('admin.2fa.verify');
+Route::post('/admin/2fa', [TwoFactorController::class, 'check'])->name('admin.2fa.check');
+Route::post('/admin/2fa/recover', [TwoFactorController::class, 'recover'])->name('admin.2fa.recover');
+
 Route::prefix('admin')->name('admin.')->middleware(['web', 'admin'])->group(function () {
     // Logout
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
@@ -71,4 +82,15 @@ Route::prefix('admin')->name('admin.')->middleware(['web', 'admin'])->group(func
     Route::post('/system/logs/clear', [SystemController::class, 'logsClear'])->name('system.logs.clear');
     Route::get('/system/tools', [SystemController::class, 'tools'])->name('system.tools');
     Route::post('/system/tools/execute', [SystemController::class, 'toolsExecute'])->name('system.tools.execute');
+
+    // 2FA management (requires admin session)
+    Route::get('/2fa/setup', [TwoFactorController::class, 'setup'])->name('2fa.setup');
+    Route::post('/2fa/enable', [TwoFactorController::class, 'enable'])->name('2fa.enable');
+    Route::post('/2fa/disable', [TwoFactorController::class, 'disable'])->name('2fa.disable');
+    Route::post('/2fa/regenerate', [TwoFactorController::class, 'regenerate'])->name('2fa.regenerate');
+
+    // OAuth management (requires admin session)
+    Route::get('/oauth/manage', [OAuthController::class, 'manage'])->name('oauth.manage');
+    Route::post('/oauth/{provider}/disconnect', [OAuthController::class, 'disconnect'])->name('oauth.disconnect');
+    Route::post('/oauth/{provider}/grant', [OAuthController::class, 'grantAdmin'])->name('oauth.grant');
 });
