@@ -6,11 +6,11 @@ services:
     container_name: dropzone-app
     restart: unless-stopped
     ports:
-      - "8080:80"
+      - "8083:80"
     environment:
       - APP_ENV=${APP_ENV:-production}
       - APP_DEBUG=${APP_DEBUG:-false}
-      - APP_URL=${APP_URL:-http://localhost:8080}
+      - APP_URL=${APP_URL:-http://localhost:8083}
       - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin123}
     volumes:
       - ./storage:/var/www/storage

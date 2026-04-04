@@ -11,16 +11,12 @@ class AdminMiddleware
     /**
      * Handle an incoming request.
      *
-     * Ensures user has admin role.
+     * Ensures user is authenticated as admin.
      */
     public function handle( Request $request, Closure $next ): Response
     {
-        if ( ! auth()->check() ) {
+        if ( ! session( 'admin_authenticated' ) ) {
             return redirect()->route( 'admin.login' );
-        }
-
-        if ( ! auth()->user()->isAdmin() ) {
-            abort( 403, 'Unauthorized - Admin access required.' );
         }
 
         return $next( $request );
