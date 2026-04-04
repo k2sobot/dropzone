@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\AdminSetting;
 use App\Services\FileService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
 
 class UploadController extends Controller
@@ -18,9 +19,15 @@ class UploadController extends Controller
      */
     public function index()
     {
+        $user = Auth::user();
+        $maxFileSize = $user
+            ? $user->max_file_size
+            : AdminSetting::getMaxFileSize();
+
         return view('upload-content', [
             'siteName' => AdminSetting::getSiteName(),
-            'maxFileSize' => AdminSetting::getMaxFileSize(),
+            'maxFileSize' => $maxFileSize,
+            'user' => $user,
         ]);
     }
 
@@ -29,11 +36,24 @@ class UploadController extends Controller
      */
     public function store(Request $request)
     {
-        $maxFileSize = AdminSetting::getMaxFileSize();
+        $user = Auth::user();
+        $maxFileSize = $user
+            ? $user->max_file_size
+            : AdminSetting::getMaxFileSize();
 
         $request->validate([
             'file' => "required|file|max:{$maxFileSize}",
         ]);
+
+        // Check user-specific upload limits
+        $canUpload = $this->fileService->canUpload(
+            $request->file('file')->getSize(),
+            $user
+        );
+
+        if (!$canUpload['allowed']) {
+            return back()->with('error', $canUpload['reason']);
+        }
 
         // Rate limiting - 5 uploads per minute per IP
         $key = 'upload:'.$request->ip();
@@ -47,7 +67,8 @@ class UploadController extends Controller
         // Store the file
         $upload = $this->fileService->store(
             $request->file('file'),
-            $request->ip()
+            $request->ip(),
+            $user
         );
 
         return redirect()->route('home')->with([

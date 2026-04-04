@@ -22,6 +22,7 @@ class Upload extends Model
      */
     protected $fillable = [
         'id',
+        'user_id',
         'filename',
         'path',
         'size',
@@ -54,6 +55,14 @@ class Upload extends Model
                 $model->id = (string) Str::uuid();
             }
         });
+    }
+
+    /**
+     * Get the user who uploaded this file.
+     */
+    public function user()
+    {
+        return $this->belongsTo( User::class );
     }
 
     /**

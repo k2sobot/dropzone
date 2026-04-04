@@ -4,7 +4,9 @@ namespace App\Services;
 
 use App\Models\AdminSetting;
 use App\Models\Upload;
+use App\Models\User;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 class FileService
@@ -19,11 +21,12 @@ class FileService
     /**
      * Store an uploaded file.
      */
-    public function store( UploadedFile $file, ?string $uploaderIp = null ): Upload
+    public function store( UploadedFile $file, ?string $uploaderIp = null, ?User $user = null ): Upload
     {
         $uuid = (string) Str::uuid();
         $filename = $file->getClientOriginalName();
         $path = "uploads/{$uuid}/{$filename}";
+        $fileSize = $file->getSize();
 
         // Store via storage driver
         $storedPath = $this->storage->store(
@@ -31,19 +34,79 @@ class FileService
             file_get_contents( $file->getRealPath() )
         );
 
-        // Get expiration setting (default 24 hours)
-        $expirationHours = (int) AdminSetting::get( 'default_expiration', 24 );
+        // Get user or check for authenticated user
+        $user = $user ?? Auth::user();
+
+        // Get expiration setting (user-specific or global default)
+        $expirationHours = $user
+            ? $user->default_expiration
+            : (int) AdminSetting::get( 'default_expiration', 24 );
 
         // Create database record
-        return Upload::create( [
+        $upload = Upload::create( [
             'id'           => $uuid,
+            'user_id'      => $user?->id,
             'filename'     => $filename,
             'path'         => $storedPath,
-            'size'         => $file->getSize(),
+            'size'         => $fileSize,
             'mime_type'    => $file->getMimeType(),
             'uploader_ip'  => $uploaderIp,
             'expires_at'   => now()->addHours( $expirationHours ),
         ] );
+
+        // Update user storage usage if applicable
+        if ( $user ) {
+            $user->addStorageUsed( $fileSize );
+        }
+
+        return $upload;
+    }
+
+    /**
+     * Check if user can upload a file of given size.
+     */
+    public function canUpload( int $fileSize, ?User $user = null ): array
+    {
+        $user = $user ?? Auth::user();
+
+        // Get max file size (user-specific or global)
+        $maxFileSize = $user
+            ? $user->max_file_size
+            : (int) AdminSetting::get( 'max_file_size', 104857600 );
+
+        if ( $fileSize > $maxFileSize ) {
+            return [
+                'allowed' => false,
+                'reason'  => 'File size exceeds maximum allowed (' . round( $maxFileSize / 1048576, 1 ) . 'MB)',
+            ];
+        }
+
+        // Check user storage quota if applicable
+        if ( $user && $user->hasStorageQuota() ) {
+            $remaining = $user->getRemainingStorage();
+            if ( $fileSize > $remaining ) {
+                return [
+                    'allowed' => false,
+                    'reason'  => 'Insufficient storage quota. ' . round( $remaining / 1048576, 1 ) . 'MB remaining.',
+                ];
+            }
+        }
+
+        // Check daily upload limit if applicable
+        if ( $user && $user->getAttributes()['max_uploads_per_day'] ) {
+            $todayUploads = Upload::where( 'user_id', $user->id )
+                ->whereDate( 'created_at', today() )
+                ->count();
+
+            if ( $todayUploads >= $user->max_uploads_per_day ) {
+                return [
+                    'allowed' => false,
+                    'reason'  => 'Daily upload limit reached (' . $user->max_uploads_per_day . ' uploads/day)',
+                ];
+            }
+        }
+
+        return [ 'allowed' => true ];
     }
 
     /**
@@ -91,13 +154,24 @@ class FileService
      */
     public function delete( Upload $upload ): bool
     {
+        // Get file size before deletion
+        $fileSize = $upload->size;
+        $user = $upload->user;
+
         // Delete from storage
         if ( $this->storage->exists( $upload->path ) ) {
             $this->storage->delete( $upload->path );
         }
 
         // Delete from database
-        return $upload->delete();
+        $deleted = $upload->delete();
+
+        // Update user storage usage if applicable
+        if ( $deleted && $user ) {
+            $user->subtractStorageUsed( $fileSize );
+        }
+
+        return $deleted;
     }
 
     /**
