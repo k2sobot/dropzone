@@ -14,6 +14,8 @@ return [
     'fallback_locale' => 'en',
     'cipher' => 'AES-256-CBC',
     'key' => env('APP_KEY'),
+
+    'extension_license_key' => env('EXTENSION_LICENSE_KEY', env('APP_KEY')),
     'admin_username' => env('ADMIN_USERNAME', 'admin'),
     'admin_password' => env('ADMIN_PASSWORD'),
     'maintenance' => [

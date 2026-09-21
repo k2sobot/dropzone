@@ -222,3 +222,16 @@ Event::listen(FileUploaded::class, function ($event) {
     ]);
 });
 ```
+
+## Paid modules (FreeScout-style)
+
+Core Dropzone is free. Official modules are **one-time** purchases with **1 year of updates** included. After that the module keeps working; you only pay if you want newer versions.
+
+Issue a key (on your license machine, using the same `EXTENSION_LICENSE_KEY` / `APP_KEY`):
+
+```
+php artisan dropzone:license-issue dropzone/s3 --domain=example.com --years=1
+php artisan dropzone:license-issue dropzone/s3 --domain=* --years=1
+```
+
+Paste the key in Admin → Extensions. Unlicensed paid modules will not load.
