@@ -10,15 +10,15 @@ use Illuminate\Support\Str;
 
 /**
  * Remember-me aligned with Laravel/FreeScout:
- * checkbox name "remember", 400-day httponly cookie, token + password fingerprint
+ * checkbox name "remember", 14-day httponly cookie (WordPress), token + password fingerprint
  * so a password change invalidates it. Token is not rotated on each request.
  */
 class AdminSession
 {
     public const COOKIE = 'dropzone_remember';
 
-    // Same duration as Laravel SessionGuard / FreeScout (400 days).
-    public const REMEMBER_MINUTES = 576000;
+    // WordPress auth_cookie_expiration: 14 days when Remember Me is checked.
+    public const REMEMBER_MINUTES = 60 * 24 * 14;
 
     public static function login(Request $request, string $username, bool $remember, array $extra = []): void
     {
