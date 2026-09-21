@@ -143,7 +143,8 @@ class FileService
 
         $contents = $this->storage->get($upload->path);
 
-        if (! $contents) {
+        if ($contents === null) {
+            Upload::where('id', $uuid)->update(['downloaded_at' => null]);
             return null;
         }
 

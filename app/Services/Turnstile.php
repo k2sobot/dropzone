@@ -46,7 +46,7 @@ class Turnstile
             return false;
         }
 
-        return (bool) $response->json('success');
+        return $response->successful() && $response->json('success') === true;
     }
 
     public static function rejectUnlessValid(Request $request)
