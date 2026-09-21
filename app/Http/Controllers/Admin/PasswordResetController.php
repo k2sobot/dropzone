@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Models\AdminSetting;
 use App\Services\AdminSession;
+use App\Services\Turnstile;
 use App\Models\SystemLog;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -27,6 +28,10 @@ class PasswordResetController
         $request->validate([
             'email' => 'required|email',
         ]);
+
+        if ($failed = Turnstile::rejectUnlessValid($request)) {
+            return $failed;
+        }
 
         $key = 'admin-forgot:'.$request->ip();
         if (RateLimiter::tooManyAttempts($key, 5)) {

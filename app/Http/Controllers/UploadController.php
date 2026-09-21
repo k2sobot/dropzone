@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AdminSetting;
 use App\Services\FileService;
+use App\Services\Turnstile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
@@ -36,6 +37,10 @@ class UploadController extends Controller
      */
     public function store(Request $request)
     {
+        if ($failed = Turnstile::rejectUnlessValid($request)) {
+            return $failed;
+        }
+
         $key = 'upload:'.$request->ip();
 
         if (RateLimiter::tooManyAttempts($key, 5)) {
