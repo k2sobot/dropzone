@@ -58,6 +58,7 @@ class AuthController
 
         $username = $request->get('username');
         $password = $request->get('password');
+        $loginUsername = (string) $username;
 
         // Get stored credentials
         $storedUsername = AdminSetting::get('admin_username');
@@ -84,6 +85,7 @@ class AuthController
             // Verify password hash
             if (Hash::check($password, $storedPasswordHash)) {
                 $credentialsValid = true;
+                $loginUsername = (string) $storedUsername;
             }
         } else {
             // Fall back to env credentials (initial setup)
@@ -92,6 +94,7 @@ class AuthController
 
             if ($envPassword !== '' && hash_equals($envUsername, (string) $username) && hash_equals($envPassword, (string) $password)) {
                 $credentialsValid = true;
+                $loginUsername = $envUsername;
             }
         }
 
@@ -99,20 +102,20 @@ class AuthController
             $remember = $request->filled('remember');
 
             // Check if 2FA is enabled
-            $twoFactor = TwoFactorAuth::getForUsername($username);
+            $twoFactor = TwoFactorAuth::getForUsername($loginUsername);
             if ($twoFactor && $twoFactor->isEnabled()) {
                 $request->session()->put('2fa_pending', [
-                    'username' => $username,
+                    'username' => $loginUsername,
                     'remember' => $remember,
                 ]);
                 return redirect()->route('admin.2fa.verify');
             }
 
             RateLimiter::clear($throttleKey);
-            AdminSession::login($request, $username, $remember);
+            AdminSession::login($request, $loginUsername, $remember);
 
             SystemLog::info('Admin login successful', [
-                'username' => $username,
+                'username' => $loginUsername,
                 'ip' => $request->ip(),
             ]);
 
