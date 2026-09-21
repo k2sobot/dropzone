@@ -8,7 +8,7 @@ echo "=================="
 # Check if .env exists
 if [ ! -f .env ]; then
     echo "📝 Creating .env file..."
-    cp .env.production .env
+    cp .env.example .env
 fi
 
 # Install dependencies
@@ -39,7 +39,7 @@ chmod -R 775 storage bootstrap/cache
 echo ""
 echo "✅ Setup complete!"
 echo ""
-echo "🌐 Upload page: http://localhost:8080"
-echo "🔐 Admin panel: http://localhost:8080/admin"
+echo "🌐 Upload page: http://localhost:8083"
+echo "🔐 Admin panel: http://localhost:8083/admin"
 echo "⚙️  Admin password: check ADMIN_PASSWORD in .env"
 echo ""

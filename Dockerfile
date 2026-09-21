@@ -55,48 +55,8 @@ RUN sed -i 's|/var/www/html|/var/www/public|g' /etc/apache2/sites-available/000-
     Require all granted\n\
 </Directory>' >> /etc/apache2/apache2.conf
 
-# Create startup script
-RUN printf '#!/bin/bash\n\
-set -e\n\
-\n\
-# Remove existing database for clean slate\n\
-rm -f /var/www/storage/database.sqlite\n\
-\n\
-# Create fresh database\n\
-touch /var/www/storage/database.sqlite\n\
-chmod 666 /var/www/storage/database.sqlite\n\
-\n\
-# Create required directories\n\
-mkdir -p /var/www/storage/framework/views\n\
-mkdir -p /var/www/storage/framework/cache\n\
-mkdir -p /var/www/storage/framework/sessions\n\
-mkdir -p /var/www/storage/logs\n\
-\n\
-# Install dependencies if vendor missing\n\
-if [ ! -d /var/www/vendor ]; then\n\
-    composer install --no-dev --optimize-autoloader\n\
-fi\n\
-\n\
-# Generate app key if missing\n\
-if [ -z "$APP_KEY" ]; then\n\
-    php artisan key:generate --force\n\
-fi\n\
-\n\
-# Run fresh migrations\n\
-php artisan migrate:fresh --force\n\
-\n\
-# Create storage link\n\
-php artisan storage:link\n\
-\n\
-# Set proper permissions after everything is ready\n\
-chown -R www-data:www-data /var/www/storage\n\
-chown -R www-data:www-data /var/www/bootstrap/cache\n\
-chmod -R 775 /var/www/storage\n\
-chmod -R 775 /var/www/bootstrap/cache\n\
-\n\
-# Start Supervisor\n\
-exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf\n\
-' > /usr/local/bin/start.sh && chmod +x /usr/local/bin/start.sh
+COPY docker/start.sh /usr/local/bin/start.sh
+RUN chmod +x /usr/local/bin/start.sh
 
 EXPOSE 80
 

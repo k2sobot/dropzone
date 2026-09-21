@@ -11,10 +11,10 @@ cd dropzone
 docker-compose up -d
 ```
 
-Visit: http://localhost:8080
+Visit: http://localhost:8083
 
-**Admin Panel:** http://localhost:8080/admin  
-**Default Password:** `admin123` (change in .env)
+**Admin Panel:** http://localhost:8083/admin  
+**Admin password:** set `ADMIN_PASSWORD` in `.env` (or complete the setup wizard)
 
 ## Features
 
@@ -34,8 +34,8 @@ Set these in `.env` or `docker-compose.yml`:
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `APP_URL` | `http://localhost:8080` | Your domain |
-| `ADMIN_PASSWORD` | `admin123` | Admin panel password |
+| `APP_URL` | `http://localhost:8083` | Your domain |
+| `ADMIN_PASSWORD` | _(empty)_ | Admin panel password until setup wizard stores a hash |
 | `APP_ENV` | `production` | `local` or `production` |
 | `APP_DEBUG` | `false` | Enable debug mode |
 
