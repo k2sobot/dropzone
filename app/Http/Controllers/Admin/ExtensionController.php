@@ -79,7 +79,7 @@ class ExtensionController extends Controller
                     'description' => $composer['extra']['dropzone']['description']
                         ?? $composer['description']
                         ?? '',
-                    'type'        => $composer['extra']['dropzone']['storage_driver'] ? 'Storage' : 'Feature',
+                    'type'        => ! empty($composer['extra']['dropzone']['storage_driver'] ?? null) ? 'Storage' : 'Feature',
                     'enabled'     => $enabled,
                     'composer_name' => $composer['name'] ?? '',
                 ];

@@ -5,12 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Admin - {{ $siteName ?? 'Dropzone' }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    @include('partials.theme')
     <style>
         html { -webkit-text-size-adjust: 100%; }
         input, select, textarea, button { font-size: 16px; }
     </style>
 </head>
-<body class="bg-gray-900 min-h-dvh overflow-x-hidden">
+<body class="bg-gray-100 dark:bg-gray-900 min-h-dvh overflow-x-hidden">
     <nav class="bg-gray-800 border-b border-gray-700">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">

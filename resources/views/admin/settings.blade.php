@@ -37,6 +37,15 @@
                     <input type="text" name="site_name" value="{{ $settings['site_name'] }}"
                         class="w-full bg-gray-700 text-white rounded-lg px-4 py-2">
                 </div>
+                <div>
+                    <label class="block text-gray-300 text-sm mb-2">Theme</label>
+                    <select name="theme" class="w-full bg-gray-700 text-white rounded-lg px-4 py-2">
+                        <option value="system" {{ ($settings['theme'] ?? 'system') === 'system' ? 'selected' : '' }}>System</option>
+                        <option value="dark" {{ ($settings['theme'] ?? '') === 'dark' ? 'selected' : '' }}>Dark</option>
+                        <option value="light" {{ ($settings['theme'] ?? '') === 'light' ? 'selected' : '' }}>Light</option>
+                    </select>
+                    <p class="text-gray-500 text-xs mt-1">System follows the device (iPhone light/dark).</p>
+                </div>
 
                 <div>
                     <label class="block text-gray-300 text-sm mb-2">App URL</label>

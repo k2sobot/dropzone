@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ $siteName ?? 'Dropzone' }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    @include('partials.theme')
     <style>
         html { -webkit-text-size-adjust: 100%; }
         input, select, textarea, button { font-size: 16px; }
@@ -22,7 +23,7 @@
         }
     </style>
 </head>
-<body class="bg-custom min-h-dvh bg-gray-900 overflow-x-hidden">
+<body class="bg-custom min-h-dvh bg-gray-100 dark:bg-gray-900 overflow-x-hidden">
     <div class="min-h-dvh flex flex-col items-center justify-center p-3 sm:p-4">
         @if($errors->any())
             <div class="mb-4 p-4 bg-red-500/20 border border-red-500 rounded-lg text-red-200 max-w-md w-full">

@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use App\Services\FileService;
 use App\Services\StorageDriverInterface;
+use App\Models\AdminSetting;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -38,6 +40,17 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        View::composer('*', function ($view) {
+            $theme = 'system';
+            try {
+                $theme = AdminSetting::get('theme', 'system');
+            } catch (\Throwable $e) {
+                // Database may not be ready during setup.
+            }
+            if (! in_array($theme, ['dark', 'light', 'system'], true)) {
+                $theme = 'system';
+            }
+            $view->with('theme', $theme);
+        });
     }
 }

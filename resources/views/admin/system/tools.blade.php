@@ -1,110 +1,42 @@
 @extends('admin.layout', ['siteName' => $siteName ?? 'Dropzone'])
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>System Tools</h2>
-    <div>
-        <a href="{{ route('admin.system.status') }}" class="btn btn-outline-primary">Status</a>
-        <a href="{{ route('admin.system.logs') }}" class="btn btn-outline-secondary">Logs</a>
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+    <h2 class="text-2xl font-bold text-white">System Tools</h2>
+    <div class="flex gap-2">
+        <a href="{{ route('admin.system.status') }}" class="px-3 py-2 rounded-lg bg-gray-700 text-white text-sm">Status</a>
+        <a href="{{ route('admin.system.logs') }}" class="px-3 py-2 rounded-lg bg-gray-700 text-white text-sm">Logs</a>
     </div>
 </div>
 
-<!-- Output -->
 @if($output)
-<div class="card mb-4 border-success">
-    <div class="card-header bg-success text-white">
-        <h6 class="mb-0">Command Output</h6>
-    </div>
-    <div class="card-body">
-        <pre class="bg-dark text-light p-3 mb-0" style="max-height: 300px; overflow-y: auto;">{{ $output }}</pre>
-    </div>
+<div class="bg-gray-800 rounded-lg p-4 mb-6">
+    <h3 class="text-white font-semibold mb-2">Output</h3>
+    <pre class="bg-black text-green-300 p-3 rounded text-xs overflow-auto max-h-72">{{ $output }}</pre>
 </div>
 @endif
 
-<!-- Tools -->
-<div class="row">
-    <div class="col-md-6 mb-4">
-        <div class="card">
-            <div class="card-header"><h6 class="mb-0">Cache Management</h6></div>
-            <div class="card-body">
-                <p class="text-muted">Clear application cache, config cache, and view cache.</p>
-                <form method="POST" action="{{ route('admin.system.tools.execute') }}">
-                    @csrf
-                    <input type="hidden" name="action" value="clear_cache">
-                    <button type="submit" class="btn btn-warning">Clear Cache</button>
-                </form>
-            </div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    @php
+        $tools = [
+            ['clear_cache', 'Clear cache', 'Config, views, and application cache.', 'Clear'],
+            ['clear_logs', 'Clear logs', 'Delete system log rows.', 'Clear logs', true],
+            ['storage_link', 'Storage link', 'Link public/storage to storage/app/public (backgrounds only).', 'Create link'],
+            ['migrate', 'Migrations', 'Run pending database migrations.', 'Migrate', true],
+            ['optimize', 'Optimize', 'Cache config, routes, and views.', 'Optimize'],
+            ['run_cron', 'Run cron', 'Trigger scheduled cleanup now.', 'Run'],
+        ];
+    @endphp
+    @foreach($tools as $tool)
+        <div class="bg-gray-800 rounded-lg p-6">
+            <h3 class="text-white font-semibold mb-2">{{ $tool[1] }}</h3>
+            <p class="text-gray-400 text-sm mb-4">{{ $tool[2] }}</p>
+            <form method="POST" action="{{ route('admin.system.tools.execute') }}" @if(!empty($tool[4])) onsubmit="return confirm('{{ $tool[1] }}?')" @endif>
+                @csrf
+                <input type="hidden" name="action" value="{{ $tool[0] }}">
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm">{{ $tool[3] }}</button>
+            </form>
         </div>
-    </div>
-
-    <div class="col-md-6 mb-4">
-        <div class="card">
-            <div class="card-header"><h6 class="mb-0">Logs Management</h6></div>
-            <div class="card-body">
-                <p class="text-muted">Clear all system logs from the database.</p>
-                <form method="POST" action="{{ route('admin.system.tools.execute') }}" onsubmit="return confirm('Clear all system logs?')">
-                    @csrf
-                    <input type="hidden" name="action" value="clear_logs">
-                    <button type="submit" class="btn btn-danger">Clear Logs</button>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-6 mb-4">
-        <div class="card">
-            <div class="card-header"><h6 class="mb-0">Storage Link</h6></div>
-            <div class="card-body">
-                <p class="text-muted">Create a symbolic link from public/storage to storage/app/public.</p>
-                <form method="POST" action="{{ route('admin.system.tools.execute') }}">
-                    @csrf
-                    <input type="hidden" name="action" value="storage_link">
-                    <button type="submit" class="btn btn-info">Create Storage Link</button>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-6 mb-4">
-        <div class="card">
-            <div class="card-header"><h6 class="mb-0">Database Migration</h6></div>
-            <div class="card-body">
-                <p class="text-muted">Run pending database migrations.</p>
-                <form method="POST" action="{{ route('admin.system.tools.execute') }}" onsubmit="return confirm('Run database migrations?')">
-                    @csrf
-                    <input type="hidden" name="action" value="migrate">
-                    <button type="submit" class="btn btn-primary">Run Migrations</button>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-6 mb-4">
-        <div class="card">
-            <div class="card-header"><h6 class="mb-0">Optimize Application</h6></div>
-            <div class="card-body">
-                <p class="text-muted">Cache config, routes, and views for better performance.</p>
-                <form method="POST" action="{{ route('admin.system.tools.execute') }}">
-                    @csrf
-                    <input type="hidden" name="action" value="optimize">
-                    <button type="submit" class="btn btn-success">Optimize</button>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-6 mb-4">
-        <div class="card">
-            <div class="card-header"><h6 class="mb-0">Run Cron</h6></div>
-            <div class="card-body">
-                <p class="text-muted">Manually trigger the system cron job.</p>
-                <form method="POST" action="{{ route('admin.system.tools.execute') }}">
-                    @csrf
-                    <input type="hidden" name="action" value="run_cron">
-                    <button type="submit" class="btn btn-secondary">Run Cron</button>
-                </form>
-            </div>
-        </div>
-    </div>
+    @endforeach
 </div>
 @endsection

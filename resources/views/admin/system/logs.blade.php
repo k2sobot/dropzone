@@ -1,93 +1,57 @@
 @extends('admin.layout', ['siteName' => $siteName ?? 'Dropzone'])
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>System Logs</h2>
-    <div>
-        <a href="{{ route('admin.system.status') }}" class="btn btn-outline-primary">Status</a>
-        <a href="{{ route('admin.system.tools') }}" class="btn btn-outline-secondary">Tools</a>
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+    <h2 class="text-2xl font-bold text-white">System Logs</h2>
+    <div class="flex gap-2">
+        <a href="{{ route('admin.system.status') }}" class="px-3 py-2 rounded-lg bg-gray-700 text-white text-sm">Status</a>
+        <a href="{{ route('admin.system.tools') }}" class="px-3 py-2 rounded-lg bg-gray-700 text-white text-sm">Tools</a>
     </div>
 </div>
 
-<!-- Filters -->
-<div class="card mb-4">
-    <div class="card-body">
-        <form method="GET" class="row g-3">
-            <div class="col-md-4">
-                <select name="level" class="form-select">
-                    @foreach($levels as $value => $label)
-                        <option value="{{ $value }}" {{ $level === $value ? 'selected' : '' }}>{{ $label }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="col-md-6">
-                <input type="text" name="search" class="form-control" placeholder="Search logs..." value="{{ $search }}">
-            </div>
-            <div class="col-md-2">
-                <button type="submit" class="btn btn-primary w-100">Filter</button>
-            </div>
-        </form>
-    </div>
-</div>
+<form method="GET" class="bg-gray-800 rounded-lg p-4 mb-6 grid grid-cols-1 sm:grid-cols-4 gap-3">
+    <select name="level" class="bg-gray-700 text-white rounded-lg px-3 py-2 text-base">
+        @foreach($levels as $value => $label)
+            <option value="{{ $value }}" {{ $level === $value ? 'selected' : '' }}>{{ $label }}</option>
+        @endforeach
+    </select>
+    <input type="text" name="search" value="{{ $search }}" placeholder="Search logs..." class="sm:col-span-2 bg-gray-700 text-white rounded-lg px-3 py-2 text-base">
+    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-3 py-2">Filter</button>
+</form>
 
-<!-- Logs Table -->
-<div class="card">
-    <div class="card-header d-flex justify-content-between align-items-center">
-        <h6 class="mb-0">Log Entries</h6>
+<div class="bg-gray-800 rounded-lg overflow-hidden">
+    <div class="flex items-center justify-between px-4 py-3 border-b border-gray-700">
+        <h3 class="text-white font-semibold">Entries</h3>
         <form method="POST" action="{{ route('admin.system.logs.clear') }}" onsubmit="return confirm('Clear all logs?')">
             @csrf
             <input type="hidden" name="level" value="{{ $level }}">
-            <button type="submit" class="btn btn-sm btn-outline-danger">Clear Logs</button>
+            <button type="submit" class="text-red-400 text-sm hover:text-red-300">Clear</button>
         </form>
     </div>
-    <div class="card-body p-0">
-        @if($logs->count() > 0)
-            <div class="table-responsive">
-                <table class="table table-sm table-hover mb-0">
-                    <thead>
+    @if($logs->count() > 0)
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm min-w-[36rem]">
+                <thead class="bg-gray-700 text-gray-300 text-left">
+                    <tr>
+                        <th class="px-4 py-2">Time</th>
+                        <th class="px-4 py-2">Level</th>
+                        <th class="px-4 py-2">Message</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-700">
+                    @foreach($logs as $log)
                         <tr>
-                            <th style="width: 180px;">Time</th>
-                            <th style="width: 100px;">Level</th>
-                            <th>Message</th>
-                            <th style="width: 80px;"></th>
+                            <td class="px-4 py-2 text-gray-400 whitespace-nowrap">{{ $log->created_at->format('M j, H:i:s') }}</td>
+                            <td class="px-4 py-2 text-white">{{ $log->level }}</td>
+                            <td class="px-4 py-2 text-gray-300 break-all">{{ \Illuminate\Support\Str::limit($log->message, 160) }}</td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($logs as $log)
-                            <tr>
-                                <td><small>{{ $log->created_at->format('M j, H:i:s') }}</small></td>
-                                <td>
-                                    <span class="badge bg-{{ $log->level_color }}">{{ $log->level }}</span>
-                                </td>
-                                <td>
-                                    <span class="log-message" data-bs-toggle="collapse" data-bs-target="#log{{ $log->id }}">
-                                        {{ Str::limit($log->message, 100) }}
-                                    </span>
-                                    @if($log->context || $log->extra)
-                                        <div class="collapse mt-2" id="log{{ $log->id }}">
-                                            <pre class="bg-dark text-light p-2 small" style="white-space: pre-wrap;">{{ print_r(array_filter(['context' => $log->context, 'extra' => $log->extra]), true) }}</pre>
-                                        </div>
-                                    @endif
-                                </td>
-                                <td>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="collapse" data-bs-target="#log{{ $log->id }}">
-                                        <i class="bi bi-chevron-down"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="card-footer">
-                {{ $logs->links() }}
-            </div>
-        @else
-            <div class="card-body text-center text-muted">
-                No logs found.
-            </div>
-        @endif
-    </div>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+        <div class="p-4 text-gray-400">{{ $logs->links() }}</div>
+    @else
+        <p class="p-6 text-gray-400 text-center">No logs found.</p>
+    @endif
 </div>
 @endsection

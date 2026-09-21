@@ -30,6 +30,7 @@ class SettingController
                 'max_file_size_mb' => (int) (AdminSetting::get('max_file_size', 104857600) / 1048576),
                 'default_expiration' => AdminSetting::get('default_expiration', 24),
                 'storage_driver' => AdminSetting::get('storage_driver', 'local'),
+                'theme' => AdminSetting::get('theme', 'system'),
                 
                 // S3 settings
                 's3_enabled' => AdminSetting::get('s3_enabled', false),
@@ -56,6 +57,13 @@ class SettingController
                 'site_name' => 'required|string|max:255',
             ]);
             AdminSetting::set('site_name', $request->get('site_name'));
+        }
+
+        if ($request->has('theme')) {
+            $request->validate([
+                'theme' => 'required|in:dark,light,system',
+            ]);
+            AdminSetting::set('theme', $request->get('theme'));
         }
 
         if ($request->has('app_url')) {

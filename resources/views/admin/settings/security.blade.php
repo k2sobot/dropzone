@@ -97,7 +97,7 @@
             @if(session('admin_oauth_provider'))
                 <div class="flex justify-between gap-4"><dt class="text-gray-400">OAuth</dt><dd class="text-white">{{ ucfirst(session('admin_oauth_provider')) }}</dd></div>
             @endif
-            <div class="flex justify-between gap-4"><dt class="text-gray-400">Login</dt><dd class="text-white text-right">{{ \Carbon\Carbon::createFromTimestamp(session('admin_login_time'))->format('M j, Y H:i') }}</dd></div>
+            <div class="flex justify-between gap-4"><dt class="text-gray-400">Login</dt><dd class="text-white text-right">{{ session('admin_login_time') ? \Carbon\Carbon::createFromTimestamp(session('admin_login_time'))->format('M j, Y H:i') : '—' }}</dd></div>
             <div class="flex justify-between gap-4"><dt class="text-gray-400">IP</dt><dd class="text-white">{{ request()->ip() }}</dd></div>
         </dl>
         <form method="POST" action="{{ route('admin.logout') }}" class="mt-6">

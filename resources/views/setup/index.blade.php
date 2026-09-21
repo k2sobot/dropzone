@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Setup - Dropzone</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    @include('partials.theme')
     <style>
         html { -webkit-text-size-adjust: 100%; }
         input, select, textarea, button { font-size: 16px; }
@@ -13,7 +14,7 @@
         .setup-progress li::before { content: counter(step); }
     </style>
 </head>
-<body class="bg-gray-900 min-h-dvh flex items-center justify-center p-3 sm:p-4">
+<body class="bg-gray-100 dark:bg-gray-900 min-h-dvh flex items-center justify-center p-3 sm:p-4">
     <div class="w-full max-w-2xl">
         <!-- Logo -->
         <div class="text-center mb-8">
