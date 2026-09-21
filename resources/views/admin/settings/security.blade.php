@@ -90,6 +90,28 @@
         </form>
     </div>
 
+
+    <div class="bg-gray-800 rounded-lg p-5 sm:p-6">
+        <h3 class="text-lg font-semibold text-white mb-2">Cloudflare Turnstile</h3>
+        <p class="text-gray-400 text-sm mb-4">Bot check on login, password reset, and uploads. Leave the site key empty to disable.</p>
+        <form method="POST" action="{{ route('admin.settings.security.turnstile') }}" class="space-y-4">
+            @csrf
+            <div>
+                <label class="block text-gray-300 text-sm mb-2">Site key</label>
+                <input type="text" name="turnstile_site_key" value="{{ old('turnstile_site_key', $turnstileSiteKey ?? '') }}"
+                    class="w-full bg-gray-700 text-white rounded-lg px-4 py-3 text-base" placeholder="0x4AAAAAAA...">
+            </div>
+            <div>
+                <label class="block text-gray-300 text-sm mb-2">Secret key</label>
+                <input type="password" name="turnstile_secret_key" autocomplete="off"
+                    class="w-full bg-gray-700 text-white rounded-lg px-4 py-3 text-base"
+                    placeholder="{{ !empty($turnstileSecretSet) ? 'Leave blank to keep current' : '0x4AAAAAAA...' }}">
+            </div>
+            <p class="text-xs text-gray-500">Status: {{ !empty($turnstileEnabled) ? 'Active' : 'Off' }}. Create keys at dash.cloudflare.com → Turnstile.</p>
+            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg min-h-12">Save Turnstile</button>
+        </form>
+    </div>
+
     <div class="bg-gray-800 rounded-lg p-5 sm:p-6">
         <h3 class="text-lg font-semibold text-white mb-4">Current session</h3>
         <dl class="text-sm space-y-2">

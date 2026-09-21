@@ -19,6 +19,8 @@
                 <p id="file-name" class="mt-3 text-sm text-blue-400 hidden break-all px-1"></p>
             </div>
 
+        @include('partials.turnstile')
+
             <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-xl transition-colors min-h-12">
                 Get a transfer link
             </button>

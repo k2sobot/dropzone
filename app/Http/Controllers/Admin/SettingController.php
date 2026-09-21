@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Models\AdminSetting;
 use App\Services\AdminSession;
+use App\Services\Turnstile;
 use App\Models\OAuthProvider;
 use App\Models\SystemLog;
 use App\Models\TwoFactorAuth;
@@ -226,6 +227,9 @@ class SettingController
             'twoFactorEnabled' => $twoFactor?->isEnabled() ?? false,
             'recoveryCodesCount' => $twoFactor ? count($twoFactor->recovery_codes) : 0,
             'enabledProviders' => $enabledProviders,
+            'turnstileSiteKey' => Turnstile::siteKey(),
+            'turnstileEnabled' => Turnstile::enabled(),
+            'turnstileSecretSet' => Turnstile::secretKey() !== '',
             'googleConnected' => OAuthProvider::where('provider', 'google')
                 ->where('email', $username)
                 ->exists(),
@@ -307,5 +311,26 @@ class SettingController
         }
 
         return back()->with('info', 'No changes were made.');
+    }
+
+    public function updateTurnstile(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'turnstile_site_key' => 'nullable|string|max:255',
+            'turnstile_secret_key' => 'nullable|string|max:255',
+        ]);
+
+        AdminSetting::set('turnstile_site_key', trim((string) $request->get('turnstile_site_key', '')));
+
+        $secret = trim((string) $request->get('turnstile_secret_key', ''));
+        if ($secret !== '') {
+            AdminSetting::set('turnstile_secret_key', $secret);
+        }
+
+        if (! trim((string) $request->get('turnstile_site_key', ''))) {
+            AdminSetting::set('turnstile_secret_key', '');
+        }
+
+        return back()->with('success', 'Turnstile settings saved.');
     }
 }

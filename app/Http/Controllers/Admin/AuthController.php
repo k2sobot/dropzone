@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Models\AdminSetting;
 use App\Services\AdminSession;
+use App\Services\Turnstile;
 use App\Models\SystemLog;
 use App\Models\TwoFactorAuth;
 use App\Services\OAuthService;
@@ -44,6 +45,10 @@ class AuthController
             'username' => 'required|string',
             'password' => 'required|string',
         ]);
+
+        if ($failed = Turnstile::rejectUnlessValid($request)) {
+            return $failed;
+        }
 
         $throttleKey = 'admin-login:'.$request->ip();
         if (RateLimiter::tooManyAttempts($throttleKey, 5)) {

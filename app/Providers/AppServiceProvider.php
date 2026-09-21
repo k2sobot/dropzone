@@ -51,6 +51,13 @@ class AppServiceProvider extends ServiceProvider
                 $theme = 'system';
             }
             $view->with('theme', $theme);
+            $turnstileSiteKey = '';
+            try {
+                $turnstileSiteKey = \App\Services\Turnstile::enabled() ? \App\Services\Turnstile::siteKey() : '';
+            } catch (\Throwable $e) {
+                //
+            }
+            $view->with('turnstileSiteKey', $turnstileSiteKey);
         });
     }
 }
