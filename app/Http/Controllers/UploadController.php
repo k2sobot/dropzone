@@ -36,6 +36,14 @@ class UploadController extends Controller
      */
     public function store(Request $request)
     {
+        $key = 'upload:'.$request->ip();
+
+        if (RateLimiter::tooManyAttempts($key, 5)) {
+            return back()->with('error', 'Too many uploads. Please wait a minute and try again.');
+        }
+
+        RateLimiter::hit($key, 60);
+
         $user = Auth::user();
         $maxFileSize = $user
             ? $user->max_file_size
@@ -45,26 +53,15 @@ class UploadController extends Controller
             'file' => "required|file|max:{$maxFileSize}",
         ]);
 
-        // Check user-specific upload limits
         $canUpload = $this->fileService->canUpload(
             $request->file('file')->getSize(),
             $user
         );
 
-        if (!$canUpload['allowed']) {
+        if (! $canUpload['allowed']) {
             return back()->with('error', $canUpload['reason']);
         }
 
-        // Rate limiting - 5 uploads per minute per IP
-        $key = 'upload:'.$request->ip();
-
-        if (RateLimiter::tooManyAttempts($key, 5)) {
-            return back()->with('error', 'Too many uploads. Please wait a minute and try again.');
-        }
-
-        RateLimiter::hit($key, 60);
-
-        // Store the file
         $upload = $this->fileService->store(
             $request->file('file'),
             $request->ip(),

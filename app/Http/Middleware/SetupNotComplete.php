@@ -7,25 +7,21 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class CheckSetup
+class SetupNotComplete
 {
     /**
-     * Redirects to the setup wizard if installation is not complete.
+     * Allow the setup wizard only until setup has been completed.
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if ($request->is('setup') || $request->is('setup/*')) {
-            return $next($request);
-        }
-
         try {
             $setupComplete = (bool) AdminSetting::get('setup_complete');
         } catch (\Throwable $e) {
             $setupComplete = false;
         }
 
-        if (! $setupComplete) {
-            return redirect()->route('setup');
+        if ($setupComplete) {
+            return redirect('/');
         }
 
         return $next($request);

@@ -3,10 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 
 class Upload extends Model
 {
+    use SoftDeletes;
+
     /**
      * The "type" of the auto-incrementing ID.
      */
@@ -62,7 +65,7 @@ class Upload extends Model
      */
     public function user()
     {
-        return $this->belongsTo( User::class );
+        return $this->belongsTo(User::class);
     }
 
     /**

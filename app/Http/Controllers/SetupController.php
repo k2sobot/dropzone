@@ -143,9 +143,8 @@ class SetupController extends Controller
             'admin_password' => 'required|min:8|confirmed',
         ] );
 
-        // Store admin password hash
+        AdminSetting::set( 'admin_username', $request->input( 'admin_username', 'admin' ) );
         AdminSetting::set( 'admin_password', bcrypt( $request->admin_password ) );
-        AdminSetting::set( 'admin_password_raw', $request->admin_password );
 
         return redirect( route( 'setup', [ 'step' => 4 ] ) );
     }

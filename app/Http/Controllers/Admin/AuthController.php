@@ -9,6 +9,7 @@ use App\Services\OAuthService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\View\View;
 
 class AuthController
@@ -43,6 +44,12 @@ class AuthController
             'password' => 'required|string',
         ]);
 
+        $throttleKey = 'admin-login:'.$request->ip();
+        if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
+            $seconds = RateLimiter::availableIn($throttleKey);
+            return back()->with('error', "Too many login attempts. Try again in {$seconds} seconds.")->onlyInput('username');
+        }
+
         $username = $request->get('username');
         $password = $request->get('password');
 
@@ -56,6 +63,7 @@ class AuthController
         if ($storedUsername && $storedPasswordHash) {
             // Verify username matches
             if ($username !== $storedUsername) {
+                RateLimiter::hit($throttleKey, 60);
                 SystemLog::warning('Failed login attempt - invalid username', [
                     'ip' => $request->ip(),
                     'username' => $username,
@@ -69,10 +77,10 @@ class AuthController
             }
         } else {
             // Fall back to env credentials (initial setup)
-            $envUsername = config('app.admin_username', env('ADMIN_USERNAME', 'admin'));
-            $envPassword = config('app.admin_password', env('ADMIN_PASSWORD', 'admin123'));
+            $envUsername = (string) config('app.admin_username', env('ADMIN_USERNAME', 'admin'));
+            $envPassword = (string) config('app.admin_password', env('ADMIN_PASSWORD', ''));
 
-            if ($username === $envUsername && $password === $envPassword) {
+            if ($envPassword !== '' && hash_equals($envUsername, (string) $username) && hash_equals($envPassword, (string) $password)) {
                 $credentialsValid = true;
             }
         }
@@ -87,6 +95,9 @@ class AuthController
                 ]);
                 return redirect()->route('admin.2fa.verify');
             }
+
+            RateLimiter::clear($throttleKey);
+            $request->session()->regenerate();
 
             // No 2FA, complete login
             session([
@@ -103,6 +114,8 @@ class AuthController
             return redirect()->intended(route('admin.dashboard'));
         }
 
+        RateLimiter::hit($throttleKey, 60);
+
         SystemLog::warning('Failed login attempt - invalid credentials', [
             'ip' => $request->ip(),
             'username' => $username,
@@ -114,18 +127,12 @@ class AuthController
     /**
      * Handle logout.
      */
-    public function logout(): RedirectResponse
+    public function logout(Request $request): RedirectResponse
     {
         $username = session('admin_username');
 
-        session()->forget([
-            'admin_authenticated',
-            'admin_username',
-            'admin_login_time',
-            'admin_oauth_provider',
-            'admin_oauth_name',
-            'admin_oauth_avatar',
-        ]);
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
 
         if ($username) {
             SystemLog::info('Admin logout', ['username' => $username]);

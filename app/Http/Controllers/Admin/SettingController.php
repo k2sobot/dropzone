@@ -100,7 +100,6 @@ class SettingController
             ]);
             
             AdminSetting::set('admin_password', bcrypt($request->get('admin_password')));
-            $this->updateEnvValue('ADMIN_PASSWORD', $request->get('admin_password'));
         }
 
         // S3 settings
@@ -240,7 +239,7 @@ class SettingController
         // Verify current password
         $storedUsername = AdminSetting::get('admin_username');
         $storedPasswordHash = AdminSetting::get('admin_password');
-        $envPassword = config('app.admin_password', env('ADMIN_PASSWORD', 'admin123'));
+        $envPassword = (string) config('app.admin_password', env('ADMIN_PASSWORD', ''));
         $envUsername = config('app.admin_username', env('ADMIN_USERNAME', 'admin'));
 
         $validPassword = false;
