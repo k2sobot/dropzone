@@ -213,6 +213,7 @@ class SettingController
         return view('admin.settings.security', [
             'siteName' => AdminSetting::getSiteName(),
             'currentUsername' => AdminSetting::get('admin_username', env('ADMIN_USERNAME', 'admin')),
+            'currentEmail' => AdminSetting::get('admin_email', ''),
             'twoFactorEnabled' => $twoFactor?->isEnabled() ?? false,
             'recoveryCodesCount' => $twoFactor ? count($twoFactor->recovery_codes) : 0,
             'enabledProviders' => $enabledProviders,
@@ -232,6 +233,7 @@ class SettingController
     {
         $request->validate([
             'username' => 'required|string|min:3|max:50|alpha_dash',
+            'email' => 'required|email|max:255',
             'password' => 'nullable|string|min:8|confirmed',
             'current_password' => 'required|string',
         ]);
@@ -271,6 +273,12 @@ class SettingController
             AdminSetting::set('admin_username', $newUsername);
             session(['admin_username' => $newUsername]);
             $changes[] = 'username';
+        }
+
+        $newEmail = strtolower(trim((string) $request->get('email')));
+        if ($newEmail !== strtolower((string) AdminSetting::get('admin_email', ''))) {
+            AdminSetting::set('admin_email', $newEmail);
+            $changes[] = 'email';
         }
 
         // Update password if provided

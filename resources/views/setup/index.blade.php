@@ -6,16 +6,18 @@
     <title>Setup - Dropzone</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        html { -webkit-text-size-adjust: 100%; }
+        input, select, textarea, button { font-size: 16px; }
         .setup-progress { counter-reset: step; }
         .setup-progress li { counter-increment: step; }
         .setup-progress li::before { content: counter(step); }
     </style>
 </head>
-<body class="bg-gray-900 min-h-screen flex items-center justify-center p-4">
+<body class="bg-gray-900 min-h-dvh flex items-center justify-center p-3 sm:p-4">
     <div class="w-full max-w-2xl">
         <!-- Logo -->
         <div class="text-center mb-8">
-            <h1 class="text-4xl font-bold text-white">Dropzone</h1>
+            <h1 class="text-3xl sm:text-4xl font-bold text-white">Dropzone</h1>
             <p class="text-gray-400 mt-2">Setup Wizard</p>
         </div>
 
@@ -43,7 +45,7 @@
         </div>
 
         <!-- Step Content -->
-        <div class="bg-gray-800 rounded-lg shadow-xl p-6 md:p-8">
+        <div class="bg-gray-800 rounded-lg shadow-xl p-4 sm:p-6 md:p-8">
             @if(session('error'))
                 <div class="mb-6 p-4 bg-red-500/20 border border-red-500 rounded text-red-300">
                     {{ session('error') }}
@@ -131,11 +133,11 @@
                 <form action="{{ route('setup') }}" method="POST" class="mt-8">
                     @csrf
                     <input type="hidden" name="step" value="2">
-                    <div class="flex gap-4">
-                        <a href="{{ route('setup', ['step' => 1]) }}" class="flex-1 py-3 bg-gray-600 hover:bg-gray-500 text-white rounded-lg font-medium text-center transition">
+                    <div class="flex flex-col-reverse sm:flex-row gap-3">
+                        <a href="{{ route('setup', ['step' => 1]) }}" class="flex-1 py-3 bg-gray-600 hover:bg-gray-500 text-white rounded-lg font-medium text-center transition min-h-12">
                             ← Back
                         </a>
-                        <button type="submit" class="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition">
+                        <button type="submit" class="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition min-h-12">
                             Run Migrations →
                         </button>
                     </div>
@@ -147,7 +149,7 @@
                 <h2 class="text-2xl font-bold text-white mb-6">Admin Account</h2>
 
                 <p class="text-gray-300 mb-6">
-                    Create your admin password. This will be used to access the admin panel.
+                    Create the admin account used to sign in, recover the password, and manage Dropzone.
                 </p>
 
                 <form action="{{ route('setup') }}" method="POST">
@@ -156,25 +158,40 @@
 
                     <div class="space-y-4">
                         <div>
+                            <label class="block text-gray-200 mb-2">Username</label>
+                            <input type="text" name="admin_username" value="{{ old('admin_username', 'admin') }}" required minlength="3" maxlength="50" autocomplete="username"
+                                   class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white text-base focus:outline-none focus:border-blue-500"
+                                   placeholder="admin">
+                        </div>
+
+                        <div>
+                            <label class="block text-gray-200 mb-2">Email</label>
+                            <input type="email" name="admin_email" value="{{ old('admin_email') }}" required autocomplete="email"
+                                   class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white text-base focus:outline-none focus:border-blue-500"
+                                   placeholder="you@example.com">
+                            <p class="text-gray-400 text-sm mt-1">Used for lost-password resets.</p>
+                        </div>
+
+                        <div>
                             <label class="block text-gray-200 mb-2">Admin Password</label>
-                            <input type="password" name="admin_password" required minlength="8"
-                                   class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                            <input type="password" name="admin_password" required minlength="8" autocomplete="new-password"
+                                   class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white text-base focus:outline-none focus:border-blue-500"
                                    placeholder="Minimum 8 characters">
                         </div>
 
                         <div>
                             <label class="block text-gray-200 mb-2">Confirm Password</label>
                             <input type="password" name="admin_password_confirmation" required
-                                   class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                                   class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white text-base focus:outline-none focus:border-blue-500"
                                    placeholder="Confirm password">
                         </div>
                     </div>
 
-                    <div class="flex gap-4 mt-8">
-                        <a href="{{ route('setup', ['step' => 2]) }}" class="flex-1 py-3 bg-gray-600 hover:bg-gray-500 text-white rounded-lg font-medium text-center transition">
+                    <div class="flex flex-col-reverse sm:flex-row gap-3 mt-8">
+                        <a href="{{ route('setup', ['step' => 2]) }}" class="flex-1 py-3 bg-gray-600 hover:bg-gray-500 text-white rounded-lg font-medium text-center transition min-h-12">
                             ← Back
                         </a>
-                        <button type="submit" class="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition">
+                        <button type="submit" class="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition min-h-12">
                             Continue →
                         </button>
                     </div>
@@ -193,19 +210,19 @@
                         <div>
                             <label class="block text-gray-200 mb-2">Site Name</label>
                             <input type="text" name="site_name" value="Dropzone" required
-                                   class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500">
+                                   class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white text-base focus:outline-none focus:border-blue-500">
                         </div>
 
                         <div>
                             <label class="block text-gray-200 mb-2">Site URL</label>
                             <input type="url" name="site_url" value="{{ url('/') }}" required
-                                   class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500">
+                                   class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white text-base focus:outline-none focus:border-blue-500">
                             <p class="text-gray-400 text-sm mt-1">Used for generating share links</p>
                         </div>
                     </div>
 
-                    <div class="flex gap-4 mt-8">
-                        <a href="{{ route('setup', ['step' => 3]) }}" class="flex-1 py-3 bg-gray-600 hover:bg-gray-500 text-white rounded-lg font-medium text-center transition">
+                    <div class="flex flex-col-reverse sm:flex-row gap-3 mt-8">
+                        <a href="{{ route('setup', ['step' => 3]) }}" class="flex-1 py-3 bg-gray-600 hover:bg-gray-500 text-white rounded-lg font-medium text-center transition min-h-12">
                             ← Back
                         </a>
                         <button type="submit" class="flex-1 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition">

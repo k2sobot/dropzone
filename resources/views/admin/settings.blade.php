@@ -14,7 +14,7 @@
 
         <form action="{{ route('admin.settings.background') }}" method="POST" enctype="multipart/form-data">
             @csrf
-            <div class="flex items-center space-x-4">
+            <div class="flex flex-col sm:flex-row sm:items-center gap-3">
                 <input type="file" name="background" accept="image/*" class="text-gray-300">
                 <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
                     Upload

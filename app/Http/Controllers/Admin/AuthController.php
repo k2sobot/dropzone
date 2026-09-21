@@ -61,8 +61,12 @@ class AuthController
 
         // Check if credentials are set in database
         if ($storedUsername && $storedPasswordHash) {
-            // Verify username matches
-            if ($username !== $storedUsername) {
+            $storedEmail = (string) AdminSetting::get('admin_email', '');
+            $usernameMatches = hash_equals((string) $storedUsername, (string) $username)
+                || ($storedEmail !== '' && hash_equals(strtolower($storedEmail), strtolower((string) $username)));
+
+            // Verify username or email matches
+            if (! $usernameMatches) {
                 RateLimiter::hit($throttleKey, 60);
                 SystemLog::warning('Failed login attempt - invalid username', [
                     'ip' => $request->ip(),
