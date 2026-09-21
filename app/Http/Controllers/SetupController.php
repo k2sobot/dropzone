@@ -140,10 +140,13 @@ class SetupController extends Controller
     protected function processAdmin( Request $request ): RedirectResponse
     {
         $request->validate( [
+            'admin_username' => 'required|string|min:3|max:50|alpha_dash',
+            'admin_email' => 'required|email|max:255',
             'admin_password' => 'required|min:8|confirmed',
         ] );
 
-        AdminSetting::set( 'admin_username', $request->input( 'admin_username', 'admin' ) );
+        AdminSetting::set( 'admin_username', $request->admin_username );
+        AdminSetting::set( 'admin_email', strtolower( trim( $request->admin_email ) ) );
         AdminSetting::set( 'admin_password', bcrypt( $request->admin_password ) );
 
         return redirect( route( 'setup', [ 'step' => 4 ] ) );

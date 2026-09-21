@@ -6,18 +6,24 @@
     <title>{{ $siteName ?? 'Dropzone' }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        html { -webkit-text-size-adjust: 100%; }
+        input, select, textarea, button { font-size: 16px; }
         .bg-custom {
             @if($backgroundImage ?? null)
                 background-image: url('{{ $backgroundImage }}');
                 background-size: cover;
                 background-position: center;
-                background-attachment: fixed;
             @endif
+        }
+        @media (min-width: 768px) {
+            .bg-custom {
+                background-attachment: fixed;
+            }
         }
     </style>
 </head>
-<body class="bg-custom min-h-screen bg-gray-900">
-    <div class="min-h-screen flex flex-col items-center justify-center p-4">
+<body class="bg-custom min-h-dvh bg-gray-900 overflow-x-hidden">
+    <div class="min-h-dvh flex flex-col items-center justify-center p-3 sm:p-4">
         @if($errors->any())
             <div class="mb-4 p-4 bg-red-500/20 border border-red-500 rounded-lg text-red-200 max-w-md w-full">
                 @foreach($errors->all() as $error)

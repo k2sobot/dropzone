@@ -43,6 +43,11 @@ Route::get('/d/{uuid}/download', [DownloadController::class, 'download'])->name(
 Route::get('/admin/login', [AuthController::class, 'login'])->name('admin.login');
 Route::post('/admin/login', [AuthController::class, 'authenticate'])->name('admin.authenticate');
 
+Route::get('/admin/forgot-password', [\App\Http\Controllers\Admin\PasswordResetController::class, 'request'])->name('admin.password.request');
+Route::post('/admin/forgot-password', [\App\Http\Controllers\Admin\PasswordResetController::class, 'email'])->name('admin.password.email');
+Route::get('/admin/reset-password/{token}', [\App\Http\Controllers\Admin\PasswordResetController::class, 'show'])->name('admin.password.reset');
+Route::post('/admin/reset-password/{token}', [\App\Http\Controllers\Admin\PasswordResetController::class, 'update'])->name('admin.password.update');
+
 // OAuth routes (public)
 Route::get('/admin/oauth/{provider}', [OAuthController::class, 'redirect'])->name('admin.oauth.redirect');
 Route::get('/admin/oauth/{provider}/callback', [OAuthController::class, 'callback'])->name('admin.oauth.callback');

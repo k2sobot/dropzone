@@ -1,7 +1,7 @@
 @extends('admin.layout')
 
 @section('content')
-<div class="mb-6 flex justify-between items-center">
+<div class="mb-6 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
     <h2 class="text-2xl font-bold text-white">Users</h2>
     <a href="{{ route('admin.users.create') }}" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg">
         + Add User
@@ -14,8 +14,8 @@
     </div>
 @endif
 
-<div class="bg-gray-800 rounded-lg overflow-hidden">
-    <table class="w-full">
+<div class="bg-gray-800 rounded-lg overflow-x-auto">
+    <table class="w-full min-w-[40rem]">
         <thead class="bg-gray-700">
             <tr>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">User</th>

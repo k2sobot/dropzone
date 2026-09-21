@@ -27,7 +27,7 @@
 
 <div class="mt-8 bg-gray-800 rounded-lg p-6">
     <h2 class="text-xl font-semibold text-white mb-4">Quick Actions</h2>
-    <div class="flex space-x-4">
+    <div class="flex flex-col sm:flex-row gap-3">
         <a href="{{ route('admin.uploads.index') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
             Manage Uploads
         </a>

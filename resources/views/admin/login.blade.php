@@ -1,7 +1,7 @@
 @extends('layout', ['siteName' => $siteName])
 
 @section('content')
-<div class="bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl p-8 max-w-md w-full">
+<div class="bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl p-5 sm:p-8 max-w-md w-full">
     <h1 class="text-2xl font-bold text-white text-center mb-6">
         🔐 Admin Login
     </h1>
@@ -53,26 +53,26 @@
         @csrf
 
         <div>
-            <label class="block text-gray-300 text-sm mb-2">Username</label>
-            <input type="text" name="username" value="{{ old('username') }}" required autofocus
-                class="w-full bg-gray-700 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter your username">
+            <label class="block text-gray-300 text-sm mb-2">Username or email</label>
+            <input type="text" name="username" value="{{ old('username') }}" required autofocus autocomplete="username"
+                class="w-full bg-gray-700 text-white rounded-lg px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Username or email">
         </div>
 
         <div>
             <label class="block text-gray-300 text-sm mb-2">Password</label>
-            <input type="password" name="password" required
-                class="w-full bg-gray-700 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            <input type="password" name="password" required autocomplete="current-password"
+                class="w-full bg-gray-700 text-white rounded-lg px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter your password">
         </div>
 
-        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition">
+        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition min-h-12">
             Login
         </button>
     </form>
 
-    <p class="text-center text-gray-500 text-xs mt-6">
-        Default: admin / admin123 (set ADMIN_USERNAME and ADMIN_PASSWORD in .env)
+    <p class="text-center text-sm mt-4">
+        <a href="{{ route('admin.password.request') }}" class="text-blue-400 hover:text-blue-300">Forgot password?</a>
     </p>
 </div>
 @endsection
