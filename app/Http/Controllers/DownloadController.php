@@ -77,6 +77,7 @@ class DownloadController extends Controller
             ->header('Content-Type', $mime)
             ->header('Content-Disposition', $disposition)
             ->header('X-Content-Type-Options', 'nosniff')
-            ->header('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+            ->header('Cache-Control', 'no-store, no-cache, must-revalidate, private')
+            ->header('X-Robots-Tag', 'noindex, nofollow, noarchive');
     }
 }

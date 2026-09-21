@@ -23,7 +23,7 @@ RUN docker-php-ext-install pdo_mysql pdo_sqlite mbstring exif pcntl bcmath gd zi
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Enable Apache mod_rewrite
-RUN a2enmod rewrite
+RUN a2enmod rewrite headers
 
 # Copy Supervisor config
 COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
@@ -48,12 +48,7 @@ RUN mkdir -p /var/www/bootstrap/cache \
     && chmod -R 775 /var/www/storage \
     && chmod -R 775 /var/www/bootstrap/cache
 
-# Configure Apache DocumentRoot
-RUN sed -i 's|/var/www/html|/var/www/public|g' /etc/apache2/sites-available/000-default.conf \
-    && echo '<Directory /var/www/public>\n\
-    AllowOverride All\n\
-    Require all granted\n\
-</Directory>' >> /etc/apache2/apache2.conf
+COPY docker/apache-vhost.conf /etc/apache2/sites-available/000-default.conf
 
 COPY docker/start.sh /usr/local/bin/start.sh
 RUN chmod +x /usr/local/bin/start.sh
