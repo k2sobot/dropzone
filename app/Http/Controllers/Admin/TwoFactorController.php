@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\AdminSetting;
+use App\Services\AdminSession;
 use App\Models\SystemLog;
 use App\Models\TwoFactorAuth;
 use Illuminate\Http\RedirectResponse;
@@ -56,24 +57,17 @@ class TwoFactorController
 
         // Verify the code
         if ($twoFactor->verifyCode($request->get('code'))) {
+            $remember = (bool) ($regularPending['remember'] ?? $oauthPending['remember'] ?? false);
             $request->session()->forget(['oauth_2fa_pending', '2fa_pending']);
 
-            // Complete login
+            $extra = [];
             if ($oauthPending) {
-                session([
-                    'admin_authenticated' => true,
-                    'admin_username' => $username,
-                    'admin_login_time' => time(),
+                $extra = [
                     'admin_oauth_provider' => $oauthPending['provider'],
                     'admin_oauth_name' => $oauthPending['name'],
-                ]);
-            } else {
-                session([
-                    'admin_authenticated' => true,
-                    'admin_username' => $username,
-                    'admin_login_time' => time(),
-                ]);
+                ];
             }
+            AdminSession::login($request, $username, $remember, $extra);
 
             SystemLog::info('2FA verification successful', [
                 'username' => $username,
@@ -116,24 +110,17 @@ class TwoFactorController
 
         // Verify recovery code
         if ($twoFactor->verifyRecoveryCode($request->get('recovery_code'))) {
+            $remember = (bool) ($regularPending['remember'] ?? $oauthPending['remember'] ?? false);
             $request->session()->forget(['oauth_2fa_pending', '2fa_pending']);
 
-            // Complete login
+            $extra = [];
             if ($oauthPending) {
-                session([
-                    'admin_authenticated' => true,
-                    'admin_username' => $username,
-                    'admin_login_time' => time(),
+                $extra = [
                     'admin_oauth_provider' => $oauthPending['provider'],
                     'admin_oauth_name' => $oauthPending['name'],
-                ]);
-            } else {
-                session([
-                    'admin_authenticated' => true,
-                    'admin_username' => $username,
-                    'admin_login_time' => time(),
-                ]);
+                ];
             }
+            AdminSession::login($request, $username, $remember, $extra);
 
             SystemLog::info('2FA recovery code used', [
                 'username' => $username,

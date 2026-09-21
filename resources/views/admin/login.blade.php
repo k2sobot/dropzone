@@ -66,6 +66,12 @@
                 placeholder="Enter your password">
         </div>
 
+        <label class="flex items-center gap-2 text-gray-300 text-sm select-none">
+            <input type="checkbox" name="remember" value="1" {{ old('remember', true) ? 'checked' : '' }}
+                class="rounded border-gray-600 bg-gray-700 text-blue-600 focus:ring-blue-500">
+            Remember Me
+        </label>
+
         <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition min-h-12">
             Login
         </button>

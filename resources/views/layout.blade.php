@@ -36,11 +36,10 @@
             <div class="mb-4 p-4 bg-green-500/20 border border-green-500 rounded-lg text-green-200 max-w-md w-full">
                 <p>{{ session('success') }}</p>
                 @if(session('download_url'))
-                    <div class="mt-3">
-                        <input type="text" value="{{ session('download_url') }}" readonly
-                            class="w-full bg-gray-800 text-white p-2 rounded text-sm"
-                            onclick="this.select(); navigator.clipboard.writeText(this.value);">
-                    </div>
+                    <p class="text-sm mt-2 mb-2">Share this one-time link:</p>
+                    <input type="text" value="{{ session('download_url') }}" readonly
+                        class="w-full bg-gray-800 text-white p-3 rounded-lg text-sm break-all"
+                        onclick="this.select(); navigator.clipboard.writeText(this.value);">
                 @endif
             </div>
         @endif
@@ -53,8 +52,9 @@
 
         @yield('content')
 
-        <footer class="mt-8 text-gray-400 text-sm">
+        <footer class="mt-8 text-gray-500 text-xs flex gap-4">
             <a href="/" class="hover:text-white">{{ $siteName ?? 'Dropzone' }}</a>
+            <a href="{{ route('admin.login') }}" class="hover:text-gray-300">Admin</a>
         </footer>
     </div>
 </body>

@@ -12,33 +12,21 @@ class DownloadController extends Controller
         protected FileService $fileService
     ) {}
 
-    /**
-     * Show the download landing page.
-     */
     public function show(string $uuid)
     {
         $upload = \App\Models\Upload::find($uuid);
 
-        if (! $upload) {
-            abort(404, 'File not found');
-        }
+        $payload = [
+            'upload' => null,
+            'message' => 'This file is no longer available.',
+            'siteName' => AdminSetting::getSiteName(),
+            'backgroundImage' => AdminSetting::getBackgroundImage(),
+        ];
 
-        if ($upload->isDownloaded()) {
-            return view('download', [
-                'upload' => null,
-                'message' => 'This file has already been downloaded.',
-                'siteName' => AdminSetting::getSiteName(),
-                'backgroundImage' => AdminSetting::getBackgroundImage(),
-            ]);
-        }
+        if (! $upload || $upload->isDownloaded() || $upload->isExpired()) {
+            abort_unless($upload, 404);
 
-        if ($upload->isExpired()) {
-            return view('download', [
-                'upload' => null,
-                'message' => 'This file has expired.',
-                'siteName' => AdminSetting::getSiteName(),
-                'backgroundImage' => AdminSetting::getBackgroundImage(),
-            ]);
+            return view('download', $payload);
         }
 
         return view('download', [
@@ -49,15 +37,12 @@ class DownloadController extends Controller
         ]);
     }
 
-    /**
-     * Download the file.
-     */
     public function download(string $uuid)
     {
         $result = $this->fileService->download($uuid);
 
         if (! $result) {
-            abort(404, 'File not found or no longer available');
+            abort(404);
         }
 
         $upload = $result['upload'];
@@ -73,8 +58,25 @@ class DownloadController extends Controller
             $fallback
         );
 
+        $unsafe = [
+            'text/html',
+            'application/xhtml+xml',
+            'image/svg+xml',
+            'text/xml',
+            'application/xml',
+            'application/javascript',
+            'text/javascript',
+            'application/x-httpd-php',
+        ];
+        $mime = $upload->mime_type ?: 'application/octet-stream';
+        if (in_array(strtolower($mime), $unsafe, true) || str_ends_with(strtolower($upload->filename), '.html') || str_ends_with(strtolower($upload->filename), '.svg') || str_ends_with(strtolower($upload->filename), '.php')) {
+            $mime = 'application/octet-stream';
+        }
+
         return response($result['content'])
-            ->header('Content-Type', $upload->mime_type ?: 'application/octet-stream')
-            ->header('Content-Disposition', $disposition);
+            ->header('Content-Type', $mime)
+            ->header('Content-Disposition', $disposition)
+            ->header('X-Content-Type-Options', 'nosniff')
+            ->header('Cache-Control', 'no-store, no-cache, must-revalidate, private');
     }
 }
