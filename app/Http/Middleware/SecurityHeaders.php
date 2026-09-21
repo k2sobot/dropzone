@@ -19,6 +19,11 @@ class SecurityHeaders
         $response->headers->set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
         $response->headers->remove('X-Powered-By');
 
+        $path = ltrim($request->path(), '/');
+        if ($path === 'admin' || str_starts_with($path, 'admin/') || str_starts_with($path, 'd/') || str_starts_with($path, 'storage/') || str_starts_with($path, 'setup')) {
+            $response->headers->set('X-Robots-Tag', 'noindex, nofollow, noarchive');
+        }
+
         return $response;
     }
 }
