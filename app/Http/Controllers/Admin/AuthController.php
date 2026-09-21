@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\AdminSetting;
+use App\Services\AdminSession;
 use App\Models\SystemLog;
 use App\Models\TwoFactorAuth;
 use App\Services\OAuthService;
@@ -90,25 +91,20 @@ class AuthController
         }
 
         if ($credentialsValid) {
+            $remember = $request->filled('remember');
+
             // Check if 2FA is enabled
             $twoFactor = TwoFactorAuth::getForUsername($username);
             if ($twoFactor && $twoFactor->isEnabled()) {
-                // Store pending login and redirect to 2FA
                 $request->session()->put('2fa_pending', [
                     'username' => $username,
+                    'remember' => $remember,
                 ]);
                 return redirect()->route('admin.2fa.verify');
             }
 
             RateLimiter::clear($throttleKey);
-            $request->session()->regenerate();
-
-            // No 2FA, complete login
-            session([
-                'admin_authenticated' => true,
-                'admin_username' => $username,
-                'admin_login_time' => time(),
-            ]);
+            AdminSession::login($request, $username, $remember);
 
             SystemLog::info('Admin login successful', [
                 'username' => $username,
@@ -135,8 +131,7 @@ class AuthController
     {
         $username = session('admin_username');
 
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+        AdminSession::logout($request);
 
         if ($username) {
             SystemLog::info('Admin logout', ['username' => $username]);

@@ -30,8 +30,8 @@ Route::middleware(['web', 'setup.not-complete'])->group(function () {
 // Public routes
 Route::get('/', [UploadController::class, 'index'])->name('home');
 Route::post('/upload', [UploadController::class, 'store'])->name('upload.store');
-Route::get('/d/{uuid}', [DownloadController::class, 'show'])->name('download.show');
-Route::get('/d/{uuid}/download', [DownloadController::class, 'download'])->name('download.file');
+Route::get('/d/{uuid}', [DownloadController::class, 'show'])->name('download.show')->whereUuid('uuid');
+Route::get('/d/{uuid}/download', [DownloadController::class, 'download'])->middleware('throttle:30,1')->name('download.file')->whereUuid('uuid');
 
 /*
 |--------------------------------------------------------------------------

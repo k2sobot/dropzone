@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\AdminSetting;
+use App\Services\AdminSession;
 use App\Models\SystemLog;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -92,6 +93,7 @@ class PasswordResetController
         }
 
         AdminSetting::set('admin_password', Hash::make($request->password));
+        AdminSession::invalidateRemember();
         AdminSetting::set('admin_password_reset_hash', null);
         AdminSetting::set('admin_password_reset_expires', null);
 

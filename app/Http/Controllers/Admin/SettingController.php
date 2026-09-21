@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\AdminSetting;
+use App\Services\AdminSession;
 use App\Models\OAuthProvider;
 use App\Models\SystemLog;
 use App\Models\TwoFactorAuth;
@@ -284,6 +285,7 @@ class SettingController
         // Update password if provided
         if ($request->filled('password')) {
             AdminSetting::set('admin_password', Hash::make($request->get('password')));
+            AdminSession::invalidateRemember();
             $changes[] = 'password';
         }
 
