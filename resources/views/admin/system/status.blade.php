@@ -1,117 +1,52 @@
 @extends('admin.layout', ['siteName' => $siteName ?? 'Dropzone'])
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>System Status</h2>
-    <div>
-        <a href="{{ route('admin.system.logs') }}" class="btn btn-outline-primary">Logs</a>
-        <a href="{{ route('admin.system.tools') }}" class="btn btn-outline-secondary">Tools</a>
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+    <h2 class="text-2xl font-bold text-white">System Status</h2>
+    <div class="flex gap-2">
+        <a href="{{ route('admin.system.logs') }}" class="px-3 py-2 rounded-lg bg-gray-700 text-white text-sm">Logs</a>
+        <a href="{{ route('admin.system.tools') }}" class="px-3 py-2 rounded-lg bg-gray-700 text-white text-sm">Tools</a>
     </div>
 </div>
 
-<!-- Server Info -->
-<div class="card mb-4">
-    <div class="card-header">
-        <h6 class="mb-0">Server Information</h6>
+<div class="bg-gray-800 rounded-lg p-6 mb-6 overflow-x-auto">
+    <h3 class="text-white font-semibold mb-4">Server</h3>
+    <dl class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+        <div class="flex justify-between gap-4"><dt class="text-gray-400">PHP</dt><dd class="text-white">{{ $server_info['php_version'] }}</dd></div>
+        <div class="flex justify-between gap-4"><dt class="text-gray-400">Laravel</dt><dd class="text-white">{{ $server_info['laravel_version'] }}</dd></div>
+        <div class="flex justify-between gap-4"><dt class="text-gray-400">Server</dt><dd class="text-white break-all">{{ $server_info['server_software'] }}</dd></div>
+        <div class="flex justify-between gap-4"><dt class="text-gray-400">Database</dt><dd class="text-white">{{ $server_info['database'] }}</dd></div>
+        <div class="flex justify-between gap-4"><dt class="text-gray-400">Cache</dt><dd class="text-white">{{ $server_info['cache_driver'] }}</dd></div>
+        <div class="flex justify-between gap-4"><dt class="text-gray-400">Queue</dt><dd class="text-white">{{ $server_info['queue_driver'] }}</dd></div>
+    </dl>
+</div>
+
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div class="bg-gray-800 rounded-lg p-4 text-center"><div class="text-2xl font-bold text-white">{{ number_format($uploads_count) }}</div><div class="text-gray-400 text-sm">Uploads</div></div>
+    <div class="bg-gray-800 rounded-lg p-4 text-center"><div class="text-2xl font-bold text-white">{{ number_format($logs_count) }}</div><div class="text-gray-400 text-sm">{{ $error_count > 0 ? $error_count.' errors' : 'Log entries' }}</div></div>
+    <div class="bg-gray-800 rounded-lg p-4 text-center"><div class="text-2xl font-bold text-white">{{ $storage_size }}</div><div class="text-gray-400 text-sm">Storage {{ $storage_writable ? '(writable)' : '(not writable)' }}</div></div>
+    <div class="bg-gray-800 rounded-lg p-4 text-center"><div class="text-2xl font-bold text-white">{{ $cron_status === 'ok' ? 'OK' : ($cron_status === 'warning' ? 'WARN' : '?') }}</div><div class="text-gray-400 text-sm">Cron {{ $last_cron ? \Carbon\Carbon::createFromTimestamp($last_cron)->diffForHumans() : 'never' }}</div></div>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+    <div class="bg-gray-800 rounded-lg p-6">
+        <h3 class="text-white font-semibold mb-2">Disk</h3>
+        <p class="text-gray-300 text-sm">Free: {{ $disk_free }}</p>
+        <p class="text-gray-300 text-sm">Total: {{ $disk_total }}</p>
     </div>
-    <div class="card-body">
-        <div class="row">
-            <div class="col-md-6">
-                <table class="table table-sm mb-0">
-                    <tr><th>PHP Version</th><td>{{ $server_info['php_version'] }}</td></tr>
-                    <tr><th>Laravel Version</th><td>{{ $server_info['laravel_version'] }}</td></tr>
-                    <tr><th>Server Software</th><td>{{ $server_info['server_software'] }}</td></tr>
-                </table>
-            </div>
-            <div class="col-md-6">
-                <table class="table table-sm mb-0">
-                    <tr><th>Database</th><td>{{ $server_info['database'] }}</td></tr>
-                    <tr><th>Cache Driver</th><td>{{ $server_info['cache_driver'] }}</td></tr>
-                    <tr><th>Queue Driver</th><td>{{ $server_info['queue_driver'] }}</td></tr>
-                </table>
-            </div>
-        </div>
+    <div class="bg-gray-800 rounded-lg p-6">
+        <h3 class="text-white font-semibold mb-2">Memory</h3>
+        <p class="text-gray-300 text-sm">Current: {{ $memory_usage }}</p>
+        <p class="text-gray-300 text-sm">Peak: {{ $memory_peak }}</p>
     </div>
 </div>
 
-<!-- Stats Cards -->
-<div class="row mb-4">
-    <div class="col-md-3">
-        <div class="card bg-primary text-white">
-            <div class="card-body text-center">
-                <h3 class="mb-1">{{ number_format($uploads_count) }}</h3>
-                <small>Uploads</small>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card bg-info text-white">
-            <div class="card-body text-center">
-                <h3 class="mb-1">{{ number_format($logs_count) }}</h3>
-                @if($error_count > 0)
-                    <small class="text-warning">{{ $error_count }} errors</small>
-                @else
-                    <small>Log entries</small>
-                @endif
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card bg-success text-white">
-            <div class="card-body text-center">
-                <h3 class="mb-1">{{ $storage_size }}</h3>
-                <small>Storage @if($storage_writable)(Writable)@else(Not Writable)@endif</small>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        @php $cron_card_class = $cron_status === 'ok' ? 'bg-success' : ($cron_status === 'warning' ? 'bg-warning' : 'bg-secondary') @endphp
-        <div class="card {{ $cron_card_class }} text-white">
-            <div class="card-body text-center">
-                <h3 class="mb-1">@if($cron_status === 'ok')OK@elseif($cron_status === 'warning')WARN@else@?@endif</h3>
-                <small>Cron: {{ $last_cron ? \Carbon\Carbon::createFromTimestamp($last_cron)->diffForHumans() : 'Never' }}</small>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Disk & Memory -->
-<div class="row mb-4">
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header"><h6 class="mb-0">Disk Space</h6></div>
-            <div class="card-body">
-                <p class="mb-1">Free: <strong>{{ $disk_free }}</strong></p>
-                <p class="mb-0">Total: <strong>{{ $disk_total }}</strong></p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header"><h6 class="mb-0">Memory Usage</h6></div>
-            <div class="card-body">
-                <p class="mb-1">Current: <strong>{{ $memory_usage }}</strong></p>
-                <p class="mb-0">Peak: <strong>{{ $memory_peak }}</strong></p>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Extensions -->
-<div class="card">
-    <div class="card-header"><h6 class="mb-0">PHP Extensions</h6></div>
-    <div class="card-body">
-        <div class="row">
-            @foreach($extensions as $name => $loaded)
-                <div class="col-md-3 col-sm-4 mb-2">
-                    @if($loaded)
-                        <span class="badge bg-success">{{ $name }}</span>
-                    @else
-                        <span class="badge bg-danger">{{ $name }}</span>
-                    @endif
-                </div>
-            @endforeach
-        </div>
+<div class="bg-gray-800 rounded-lg p-6">
+    <h3 class="text-white font-semibold mb-3">PHP extensions</h3>
+    <div class="flex flex-wrap gap-2">
+        @foreach($extensions as $name => $loaded)
+            <span class="text-xs px-2 py-1 rounded {{ $loaded ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400' }}">{{ $name }}</span>
+        @endforeach
     </div>
 </div>
 @endsection
