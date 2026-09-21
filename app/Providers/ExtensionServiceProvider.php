@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Services\ExtensionLicense;
 use App\Services\FileService;
 use App\Services\StorageDriverInterface;
 use Illuminate\Support\ServiceProvider;
@@ -29,7 +30,7 @@ class ExtensionServiceProvider extends ServiceProvider
         $extensions = config( 'extensions.extensions', [] );
 
         foreach ( $extensions as $extension => $enabled ) {
-            if ( $enabled ) {
+            if ( $enabled && ExtensionLicense::isActive( $extension ) ) {
                 $this->loadExtension( $extension );
             }
         }
@@ -114,7 +115,7 @@ class ExtensionServiceProvider extends ServiceProvider
                 // Check if enabled in config
                 $enabled = config( "extensions.extensions.{$dir}", false );
 
-                if ( $enabled ) {
+                if ( $enabled && ExtensionLicense::isActive( $dir ) ) {
                     $this->loadExtension( $dir );
                 }
             }

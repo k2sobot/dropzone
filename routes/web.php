@@ -73,6 +73,8 @@ Route::prefix('admin')->name('admin.')->middleware(['web', 'admin'])->group(func
 
     // Extension management
     Route::get('/extensions', [ExtensionController::class, 'index'])->name('extensions.index');
+    Route::post('/extensions/activate', [ExtensionController::class, 'activate'])->name('extensions.activate');
+    Route::post('/extensions/deactivate', [ExtensionController::class, 'deactivate'])->name('extensions.deactivate');
 
     // Settings
     Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
